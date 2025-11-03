@@ -1,4 +1,10 @@
 flask
-flask-login
-flask-pymongo
-werkzeug
+Flask
+gunicorn
+flask_sqlalchemy
+flask_login
+flask_wtf
+flask_migrate
+flask_bcrypt
+flask_mail
+flask_cors

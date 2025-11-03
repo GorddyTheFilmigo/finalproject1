@@ -8,3 +8,5 @@ flask_migrate
 flask_bcrypt
 flask_mail
 flask_cors
+Flask
+gunicorn

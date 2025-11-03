@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Resource Manager Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .alert-floating {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Firm Manager</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if 'user' not in session %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Register</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <span class="nav-link">Welcome, {{ session.user }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Logout</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Page Content -->
+    <div class="container mt-4">
+        <div class="container-fluid p-4" style="background: #f8f9fa; min-height: 100vh;">
+            <h2 class="mb-4 text-center">HR Dashboard</h2>
+
+            <!-- Payroll Management Section -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #e83e8c;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Payroll Management</h5>
+                            <div>
+                                <button class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#processPayrollModal">
+                                    <i class="fas fa-calculator me-1"></i>Process Payroll
+                                </button>
+                                <button class="btn btn-info btn-sm" data-bs-toggle="collapse" data-bs-target="#payrollSection" aria-expanded="false">
+                                    <i class="fas fa-eye me-1"></i>View Payroll Dashboard
+                                </button>
+                            </div>
+                        </div>
+                        <div class="collapse" id="payrollSection">
+                            <div class="card-body">
+                                <!-- Payroll Summary Cards -->
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6>Total Monthly Payroll</h6>
+                                                <h4 class="text-info" id="totalMonthlyPayroll">KES 0.00</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6>Employees Processed</h6>
+                                                <h4 class="text-success" id="employeesProcessed">0</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6>Pending Approvals</h6>
+                                                <h4 class="text-warning" id="pendingApprovals">0</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6>Tax Deductions</h6>
+                                                <h4 class="text-danger" id="taxDeductions">KES 0.00</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payroll Period Selection -->
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="payroll_period" class="form-label">Select Payroll Period</label>
+                                        <select class="form-control" id="payroll_period">
+                                            <option value="">Select Period</option>
+                                            <option value="current">Current Month</option>
+                                            <option value="previous">Previous Month</option>
+                                            <option value="custom">Custom Period</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4" id="custom_period" style="display: none;">
+                                        <label for="custom_month" class="form-label">Custom Month/Year</label>
+                                        <input type="month" class="form-control" id="custom_month">
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button class="btn btn-outline-primary" onclick="loadPayrollData()">
+                                            <i class="fas fa-sync me-1"></i>Load Data
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Payroll Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Employee</th>
+                                                <th>Department</th>
+                                                <th>Base Salary</th>
+                                                <th>Overtime</th>
+                                                <th>Bonuses</th>
+                                                <th>Deductions</th>
+                                                <th>Net Pay</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="payrollTableBody">
+                                            <tr>
+                                                <td colspan="9" class="text-center">Select a period to load payroll data</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="row mt-4">
+                                    <div class="col-md-12 text-center">
+                                        <button class="btn btn-success btn-lg me-3" onclick="sendPayrollToFinance()">
+                                            <i class="fas fa-paper-plane me-2"></i>Send Payroll to Finance Department
+                                        </button>
+                                        <button class="btn btn-info btn-lg" onclick="sendPaymentReportToManager()">
+                                            <i class="fas fa-chart-bar me-2"></i>Send Payment Report to Manager
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Payroll Modal -->
+            <div class="modal fade" id="processPayrollModal" tabindex="-1" aria-labelledby="processPayrollModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="processPayrollModalLabel">Process Monthly Payroll</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="processPayrollForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="payroll_month" class="form-label">Payroll Period</label>
+                                        <input type="month" class="form-control" id="payroll_month" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="pay_date" class="form-label">Pay Date</label>
+                                        <input type="date" class="form-control" id="pay_date" required>
+                                    </div>
+                                </div>
+
+                                <!-- Employee Selection -->
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label">Select Employees to Process</label>
+                                        <div class="mb-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllEmployees()">Select All</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllEmployees()">Deselect All</button>
+                                        </div>
+                                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                            <table class="table table-sm">
+                                                <thead class="table-light sticky-top">
+                                                    <tr>
+                                                        <th>Select</th>
+                                                        <th>Employee</th>
+                                                        <th>Department</th>
+                                                        <th>Base Salary (KES)</th>
+                                                        <th>Overtime Hours</th>
+                                                        <th>Bonus (KES)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="employeeSelectionTableBody">
+                                                    {% for employee in employees %}
+                                                        <tr>
+                                                            <td>
+                                                                <input type="checkbox" class="form-check-input employee-checkbox" 
+                                                                       value="{{ employee._id }}" 
+                                                                       data-employee-name="{{ employee.name }}" 
+                                                                       data-department="{{ employee.department|default('N/A') }}">
+                                                            </td>
+                                                            <td>{{ employee.name }}</td>
+                                                            <td>{{ employee.department|default('N/A') }}</td>
+                                                            <td>
+                                                                <input type="number" class="form-control form-control-sm" 
+                                                                       id="salary_{{ employee._id }}" value="{{ employee.base_salary|default(50000) }}" 
+                                                                       step="0.01" min="0">
+                                                            </td>
+                                                            <td>
+                                                                <input type="number" class="form-control form-control-sm" 
+                                                                       id="overtime_{{ employee._id }}" value="0" 
+                                                                       step="0.5" min="0">
+                                                            </td>
+                                                            <td>
+                                                                <input type="number" class="form-control form-control-sm" 
+                                                                       id="bonus_{{ employee._id }}" value="0" 
+                                                                       step="0.01" min="0">
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Deduction Settings -->
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <h6>Standard Deductions</h6>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label for="tax_rate" class="form-label">Tax Rate (%)</label>
+                                                <input type="number" class="form-control" id="tax_rate" value="15" step="0.1" min="0" max="100">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="insurance_deduction" class="form-label">Insurance (KES)</label>
+                                                <input type="number" class="form-control" id="insurance_deduction" value="500" step="0.01" min="0">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="retirement_rate" class="form-label">Retirement (%)</label>
+                                                <input type="number" class="form-control" id="retirement_rate" value="5" step="0.1" min="0" max="50">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="overtime_rate" class="form-label">Overtime Rate (KES/hr)</label>
+                                                <input type="number" class="form-control" id="overtime_rate" value="250" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-warning" onclick="calculatePayroll()">
+                                <i class="fas fa-calculator me-1"></i>Calculate Payroll
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="processPayroll()">
+                                <i class="fas fa-check me-1"></i>Process Payroll
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payroll Calculation Results Modal -->
+            <div class="modal fade" id="payrollResultsModal" tabindex="-1" aria-labelledby="payrollResultsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title" id="payrollResultsModalLabel">Payroll Calculation Results</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="payrollResultsContent">
+                            <!-- Results will be populated here -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-success" onclick="confirmPayrollProcessing()">
+                                <i class="fas fa-check-double me-1"></i>Confirm & Process
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create New Employee Profile -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #20c997;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Create New Employee Profile</h5>
+                            <button class="btn btn-success btn-sm" data-bs-toggle="collapse" data-bs-target="#createEmployeeForm" aria-expanded="false">
+                                <i class="fas fa-user-plus me-1"></i>Add New Employee
+                            </button>
+                        </div>
+                        <div class="collapse" id="createEmployeeForm">
+                            <div class="card-body">
+                                <form id="createEmployeeProfileForm" onsubmit="createEmployee(event)">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="employee_name" class="form-label">Full Name *</label>
+                                                <input type="text" class="form-control" id="employee_name" name="employee_name" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="employee_email" class="form-label">Email Address *</label>
+                                                <input type="email" class="form-control" id="employee_email" name="employee_email" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="employee_id" class="form-label">Employee ID *</label>
+                                                <input type="text" class="form-control" id="employee_id" name="employee_id" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="department" class="form-label">Department *</label>
+                                                <select class="form-control" id="department" name="department" required>
+                                                    <option value="">Select Department</option>
+                                                    <option value="IT">IT</option>
+                                                    <option value="HR">HR</option>
+                                                    <option value="Finance">Finance</option>
+                                                    <option value="Marketing">Marketing</option>
+                                                    <option value="Operations">Operations</option>
+                                                    <option value="Sales">Sales</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="position" class="form-label">Position/Job Title *</label>
+                                                <input type="text" class="form-control" id="position" name="position" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="base_salary" class="form-label">Base Salary (KES) *</label>
+                                                <input type="number" class="form-control" id="base_salary" name="base_salary" step="0.01" min="0" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="hire_date" class="form-label">Hire Date *</label>
+                                                <input type="date" class="form-control" id="hire_date" name="hire_date" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="phone" class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="phone" name="phone">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="manager" class="form-label">Manager/Supervisor</label>
+                                                <input type="text" class="form-control" id="manager" name="manager">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <div class="form-check mt-4">
+                                                    <input class="form-check-input" type="checkbox" id="generate_auto_password" name="generate_auto_password" checked>
+                                                    <label class="form-check-label" for="generate_auto_password">
+                                                        Generate automatic login credentials (recommended)
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="manual_credentials" style="display: none;">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="username" class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="username" name="username">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="temporary_password" class="form-label">Temporary Password</label>
+                                                <input type="password" class="form-control" id="temporary_password" name="temporary_password">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save me-1"></i>Create Employee Profile
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#createEmployeeForm">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Credentials Display Modal -->
+            <div class="modal fade" id="credentialsModal" tabindex="-1" aria-labelledby="credentialsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title" id="credentialsModalLabel">Employee Login Credentials Created</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <strong>Important:</strong> Please provide these credentials to the employee securely. They should change their password on first login.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Employee Name:</strong></label>
+                                <input type="text" class="form-control" id="credentialEmployeeName" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Username:</strong></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="generatedUsername" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('generatedUsername')">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Temporary Password:</strong></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="generatedPassword" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('generatedPassword')">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning">
+                                <strong>Next Steps:</strong>
+                                <ul class="mb-0">
+                                    <li>Send these credentials to the employee via secure email or in person</li>
+                                    <li>Inform them to change their password on first login</li>
+                                    <li>Ensure they have access to the employee dashboard</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="sendCredentialsEmail()">
+                                <i class="fas fa-envelope me-1"></i>Send Credentials via Email
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="row justify-content-center">
+                <!-- Employees Section -->
+                <div class="col-md-3">
+                    <div class="card shadow-sm mb-4 text-center" style="border: none; border-top: 4px solid #007bff;">
+                        <div class="card-body">
+                            <h5>Total Employees</h5>
+                            <h2 id="totalEmployeesCount">{{ employees|length }}</h2>
+                            <a href="/hr/employees" class="btn btn-primary btn-sm mt-2">Manage</a>
+                        </div>
+                    </div>
+                    <!-- Employees Details -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Recent Employees</span>
+                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#employeeCredentialsModal">
+                                View Credentials
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="px-3 py-2">Name</th>
+                                            <th class="px-2 py-2">Dept.</th>
+                                            <th class="px-2 py-2">Status</th>
+                                            <th class="px-2 py-2">Login</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="employeesTableBody">
+                                        {% for employee in employees %}
+                                            <tr>
+                                                <td class="px-3 py-2">
+                                                    <div class="text-truncate" style="max-width: 100px;" title="{{ employee.name }}">
+                                                        {{ employee.name }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small class="text-truncate d-block" style="max-width: 70px;" title="{{ employee.department|default('N/A') }}">
+                                                        {{ employee.department|default('N/A') }}
+                                                    </small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small class="badge bg-{% if employee.status == 'Active' %}success{% else %}warning{% endif %}">
+                                                        {{ employee.status|default('Active') }}
+                                                    </small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small class="badge bg-{% if employee.first_login %}success{% else %}warning{% endif %}">
+                                                        {{ 'Completed' if employee.first_login else 'Pending' }}
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Requests Section -->
+                <div class="col-md-3">
+                    <div class="card shadow-sm mb-4 text-center" style="border: none; border-top: 4px solid #28a745;">
+                        <div class="card-body">
+                            <h5>Leave Requests</h5>
+                            <h2 id="totalLeaveRequests">{{ leave_requests|length }}</h2>
+                            <a href="/hr/leaves" class="btn btn-primary btn-sm mt-2">Review</a>
+                        </div>
+                    </div>
+                    <!-- Leave Requests Details -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">Recent Leave Requests</div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="px-3 py-2">Employee</th>
+                                            <th class="px-2 py-2">Type</th>
+                                            <th class="px-2 py-2">Status</th>
+                                            <th class="px-2 py-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaveRequestsTableBody">
+                                        {% for leave in leave_requests %}
+                                            <tr id="leave_{{ leave._id }}">
+                                                <td class="px-3 py-2">
+                                                    <div class="text-truncate" style="max-width: 80px;" title="{{ leave.employee_name }}">
+                                                        {{ leave.employee_name }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small>{{ leave.reason }}</small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small class="badge bg-{% if leave.status == 'Approved' %}success{% elif leave.status == 'Rejected' %}danger{% else %}warning{% endif %}">
+                                                        {{ leave.status }}
+                                                    </small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    {% if leave.status == 'Pending' %}
+                                                        <button class="btn btn-sm btn-outline-success me-1" onclick="handleLeaveRequest('{{ leave._id }}', 'Approved')">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" onclick="handleLeaveRequest('{{ leave._id }}', 'Rejected')">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recruitment Section -->
+                <div class="col-md-3">
+                    <div class="card shadow-sm mb-4 text-center" style="border: none; border-top: 4px solid #6f42c1;">
+                        <div class="card-body">
+                            <h5>Open Positions</h5>
+                            <h2 id="totalPositions">{{ positions|length }}</h2>
+                            <a href="/hr/recruitment" class="btn btn-primary btn-sm mt-2">Manage</a>
+                        </div>
+                    </div>
+                    <!-- Recruitment Details -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">Open Positions Details</div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="px-3 py-2">Position</th>
+                                            <th class="px-2 py-2">Department</th>
+                                            <th class="px-2 py-2">Applicants</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="positionsTableBody">
+                                        {% for position in positions %}
+                                            <tr>
+                                                <td class="px-3 py-2">
+                                                    <div class="text-truncate" style="max-width: 80px;" title="{{ position.title }}">
+                                                        {{ position.title }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small class="text-truncate d-block" style="max-width: 70px;" title="{{ position.department|default('General') }}">
+                                                        {{ position.department|default('General') }}
+                                                    </small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small>{{ position.applicant_count|default(0) }}</small>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Claims Section -->
+                <div class="col-md-3">
+                    <div class="card shadow-sm mb-4 text-center" style="border: none; border-top: 4px solid #fd7e14;">
+                        <div class="card-body">
+                            <h5>Claims</h5>
+                            <h2 id="totalClaims">{{ claims|length }}</h2>
+                            <a href="/hr/claims" class="btn btn-primary btn-sm mt-2">Process</a>
+                        </div>
+                    </div>
+                    <!-- Claims Details -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">Recent Claims</div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="px-3 py-2">Employee</th>
+                                            <th class="px-2 py-2">Type</th>
+                                            <th class="px-2 py-2">Amount</th>
+                                            <th class="px-2 py-2">Status</th>
+                                            <th class="px-2 py-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="claimsTableBody">
+                                        {% for claim in claims %}
+                                            <tr id="claim_{{ claim._id }}">
+                                                <td class="px-3 py-2">
+                                                    <div class="text-truncate" style="max-width: 80px;" title="{{ claim.employee_name }}">
+                                                        {{ claim.employee_name }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small>{{ claim.description }}</small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small>KES {{ claim.amount }}</small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    <small class="badge bg-{% if claim.status == 'Approved' %}success{% elif claim.status == 'Rejected' %}danger{% else %}warning{% endif %}">
+                                                        {{ claim.status }}
+                                                    </small>
+                                                </td>
+                                                <td class="px-2 py-2">
+                                                    {% if claim.status == 'Pending' %}
+                                                        <button class="btn btn-sm btn-outline-success me-1" onclick="handleClaimRequest('{{ claim._id }}', 'Approved')">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" onclick="handleClaimRequest('{{ claim._id }}', 'Rejected')">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Credentials Management Modal -->
+            <div class="modal fade" id="employeeCredentialsModal" tabindex="-1" aria-labelledby="employeeCredentialsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="employeeCredentialsModalLabel">Employee Login Credentials Management</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee Name</th>
+                                            <th>Username</th>
+                                            <th>First Login</th>
+                                            <th>Last Login</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for employee in employees %}
+                                            <tr>
+                                                <td>{{ employee.name }}</td>
+                                                <td>{{ employee.username|default('N/A') }}</td>
+                                                <td>
+                                                    <span class="badge bg-{% if employee.first_login %}success{% else %}warning{% endif %}">
+                                                        {{ employee.first_login|default('Pending') }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ employee.last_login|default('Never') }}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="resetPassword('{{ employee._id }}')">
+                                                        <i class="fas fa-key me-1"></i>Reset Password
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-info" onclick="resendCredentials('{{ employee._id }}')">
+                                                        <i class="fas fa-envelope me-1"></i>Resend Credentials
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Width Add New Position -->
+            <div class="row">
+                <h3>Vacant Positions</h3>
+                <div class="col-md-12">
+                    <!-- Add New Position Form -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">Add New Position</div>
+                        <div class="card-body">
+                            <form id="addPositionForm" onsubmit="addPosition(event)">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="position_title" class="form-label">Position Title *</label>
+                                            <input type="text" class="form-control" id="position_title" name="position_title" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="position_department" class="form-label">Department</label>
+                                            <select class="form-control" id="position_department" name="position_department">
+                                                <option value="">Select Department</option>
+                                                <option value="IT">IT</option>
+                                                <option value="HR">HR</option>
+                                                <option value="Finance">Finance</option>
+                                                <option value="Marketing">Marketing</option>
+                                                <option value="Operations">Operations</option>
+                                                <option value="Sales">Sales</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="requirements" class="form-label">Requirements *</label>
+                                    <textarea class="form-control" id="requirements" name="requirements" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="deadline" class="form-label">Application Deadline *</label>
+                                    <input type="date" class="form-control" id="deadline" name="deadline" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Add Position
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Applications Section -->
+            <div class="container mt-4">
+                <div class="card border-danger shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Job Applications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Gender</th>
+                                        <th>Phone</th>
+                                        <th>Position</th>
+                                        <th>Qualifications</th>
+                                        <th>Resume</th>
+                                        <th>Submitted At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="jobApplicationsTableBody">
+                                    {% for application in job_applications %}
+                                        <tr>
+                                            <td>{{ application.name }}</td>
+                                            <td>{{ application.email }}</td>
+                                            <td>{{ application.gender|default('') }}</td>
+                                            <td>{{ application.phone|default('') }}</td>
+                                            <td>{{ application.position }}</td>
+                                            <td>{{ application.qualifications }}</td>
+                                            <td>
+                                                {% if application.resume_path %}
+                                                    <a href="{{ application.resume_path }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                        <i class="fas fa-file-pdf me-1"></i>View Resume
+                                                    </a>
+                                                {% else %}
+                                                    <span>No Resume</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ application.submitted_at }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports and Documents Section -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm mb-4 text-center" style="border: none; border-top: 4px solid #17a2b8;">
+                        <div class="card-body">
+                            <h5>Department Reports</h5>
+                            <h2>{{ reports|length }}</h2>
+                            <button class="btn btn-primary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#departmentReportsModal">View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Section -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm mb-4 text-center" style="border: none; border-top: 4px solid #ffc107;">
+                        <div class="card-body">
+                            <h5>Documents</h5>
+                            <h2>{{ documents|length }}</h2>
+                            <a href="/hr/documents" class="btn btn-primary btn-sm mt-2">View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Reports Modal -->
+            <div class="modal fade" id="departmentReportsModal" tabindex="-1" aria-labelledby="departmentReportsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="departmentReportsModalLabel">Select Department</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/hr/department_report">
+                                <div class="mb-3">
+                                    <label for="department_select" class="form-label">Choose Department</label>
+                                    <select class="form-select" id="department_select" name="department" required>
+                                        <option value="">Select Department</option>
+                                        <option value="IT">IT</option>
+                                        <option value="HR">HR</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="Operations">Operations</option>
+                                        <option value="Sales">Sales</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">View Reports</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HR Department Budget -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>HR Department Budget</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="budgetForm" onsubmit="setDepartmentBudget(event)">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="amount" class="form-label">Total Amount Required (KES)</label>
+                                            <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="due_date" class="form-label">Due Date</label>
+                                            <input type="date" class="form-control" id="due_date" name="due_date" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Set HR Budget
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global Variables
+        let calculatedPayroll = [];
+        let payrollMonth = '';
+        let payDate = '';
+
+        // Utility Functions
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-floating`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function formatCurrency(amount) {
+            return `KES ${parseFloat(amount).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        // Payroll Period Selection Handler
+        document.getElementById('payroll_period').addEventListener('change', function() {
+            const customPeriod = document.getElementById('custom_period');
+            if (this.value === 'custom') {
+                customPeriod.style.display = 'block';
+            } else {
+                customPeriod.style.display = 'none';
+            }
+        });
+
+        // Generate Auto Password Toggle
+        document.getElementById('generate_auto_password').addEventListener('change', function() {
+            const manualCredentials = document.getElementById('manual_credentials');
+            if (this.checked) {
+                manualCredentials.style.display = 'none';
+            } else {
+                manualCredentials.style.display = 'block';
+            }
+        });
+
+        // Employee Selection Functions
+        function selectAllEmployees() {
+            document.querySelectorAll('.employee-checkbox').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllEmployees() {
+            document.querySelectorAll('.employee-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        // Create Employee Function
+        async function createEmployee(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('createEmployeeProfileForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Add checkbox value explicitly
+            data.generate_auto_password = document.getElementById('generate_auto_password').checked;
+            
+            try {
+                const response = await fetch('/hr/create_employee', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Employee profile created successfully!', 'success');
+                    
+                    // Show credentials modal if auto-generated
+                    if (result.credentials) {
+                        document.getElementById('credentialEmployeeName').value = data.employee_name;
+                        document.getElementById('generatedUsername').value = result.credentials.username;
+                        document.getElementById('generatedPassword').value = result.credentials.password;
+                        
+                        const credentialsModal = new bootstrap.Modal(document.getElementById('credentialsModal'));
+                        credentialsModal.show();
+                    }
+                    
+                    // Reset form and collapse
+                    form.reset();
+                    bootstrap.Collapse.getInstance(document.getElementById('createEmployeeForm')).hide();
+                    
+                    // Refresh employee list
+                    refreshEmployeeList();
+                } else {
+                    showAlert('Error creating employee: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error creating employee: ' + error.message, 'danger');
+            }
+        }
+
+        // Refresh Employee List
+        async function refreshEmployeeList() {
+            try {
+                const response = await fetch('/hr/get_employees');
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateEmployeeTable(result.employees);
+                    document.getElementById('totalEmployeesCount').textContent = result.employees.length;
+                }
+            } catch (error) {
+                console.error('Error refreshing employee list:', error);
+            }
+        }
+
+        // Update Employee Table
+        function updateEmployeeTable(employees) {
+            const tbody = document.getElementById('employeesTableBody');
+            tbody.innerHTML = employees.map(emp => `
+                <tr>
+                    <td class="px-3 py-2">
+                        <div class="text-truncate" style="max-width: 100px;" title="${emp.name}">
+                            ${emp.name}
+                        </div>
+                    </td>
+                    <td class="px-2 py-2">
+                        <small class="text-truncate d-block" style="max-width: 70px;" title="${emp.department || 'N/A'}">
+                            ${emp.department || 'N/A'}
+                        </small>
+                    </td>
+                    <td class="px-2 py-2">
+                        <small class="badge bg-${emp.status === 'Active' ? 'success' : 'warning'}">
+                            ${emp.status || 'Active'}
+                        </small>
+                    </td>
+                    <td class="px-2 py-2">
+                        <small class="badge bg-${emp.first_login ? 'success' : 'warning'}">
+                            ${emp.first_login ? 'Completed' : 'Pending'}
+                        </small>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Calculate Payroll
+        function calculatePayroll() {
+            payrollMonth = document.getElementById('payroll_month').value;
+            payDate = document.getElementById('pay_date').value;
+
+            if (!payrollMonth || !payDate) {
+                showAlert('Please select payroll period and pay date.', 'warning');
+                return;
+            }
+
+            const selected = Array.from(document.querySelectorAll('.employee-checkbox:checked')).map(cb => {
+                const id = cb.value;
+                const salaryInput = document.getElementById(`salary_${id}`);
+                const overtimeInput = document.getElementById(`overtime_${id}`);
+                const bonusInput = document.getElementById(`bonus_${id}`);
+                
+                return {
+                    id,
+                    name: cb.dataset.employeeName,
+                    department: cb.dataset.department,
+                    base_salary: parseFloat(salaryInput ? salaryInput.value : 0) || 0,
+                    overtime_hours: parseFloat(overtimeInput ? overtimeInput.value : 0) || 0,
+                    bonus: parseFloat(bonusInput ? bonusInput.value : 0) || 0
+                };
+            });
+
+            if (selected.length === 0) {
+                showAlert('Please select at least one employee.', 'warning');
+                return;
+            }
+
+            const taxRate = parseFloat(document.getElementById('tax_rate').value) || 0;
+            const insurance = parseFloat(document.getElementById('insurance_deduction').value) || 0;
+            const retirementRate = parseFloat(document.getElementById('retirement_rate').value) || 0;
+            const overtimeRate = parseFloat(document.getElementById('overtime_rate').value) || 0;
+
+            calculatedPayroll = selected.map(emp => {
+                const overtime_pay = emp.overtime_hours * overtimeRate;
+                const gross = emp.base_salary + overtime_pay + emp.bonus;
+                const tax = gross * (taxRate / 100);
+                const retirement = gross * (retirementRate / 100);
+                const total_deductions = tax + insurance + retirement;
+                const net_pay = gross - total_deductions;
+
+                return {
+                    employee_id: emp.id,
+                    employee_name: emp.name,
+                    department: emp.department,
+                    base_salary: emp.base_salary.toFixed(2),
+                    overtime_pay: overtime_pay.toFixed(2),
+                    bonuses: emp.bonus.toFixed(2),
+                    gross_pay: gross.toFixed(2),
+                    tax: tax.toFixed(2),
+                    insurance: insurance.toFixed(2),
+                    retirement: retirement.toFixed(2),
+                    total_deductions: total_deductions.toFixed(2),
+                    net_pay: net_pay.toFixed(2),
+                    status: 'Pending',
+                    payroll_month: payrollMonth,
+                    pay_date: payDate
+                };
+            });
+
+            const totalGross = calculatedPayroll.reduce((sum, p) => sum + parseFloat(p.gross_pay), 0);
+            const totalDeductions = calculatedPayroll.reduce((sum, p) => sum + parseFloat(p.total_deductions), 0);
+            const totalNet = calculatedPayroll.reduce((sum, p) => sum + parseFloat(p.net_pay), 0);
+
+            const content = document.getElementById('payrollResultsContent');
+            content.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Summary:</strong><br>
+                    Total Employees: ${calculatedPayroll.length}<br>
+                    Total Gross Pay: ${formatCurrency(totalGross)}<br>
+                    Total Deductions: ${formatCurrency(totalDeductions)}<br>
+                    <strong>Total Net Pay: ${formatCurrency(totalNet)}</strong>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Gross Pay</th>
+                                <th>Deductions</th>
+                                <th>Net Pay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${calculatedPayroll.map(p => `
+                                <tr>
+                                    <td>${p.employee_name}</td>
+                                    <td>${p.department}</td>
+                                    <td>${formatCurrency(p.gross_pay)}</td>
+                                    <td>${formatCurrency(p.total_deductions)}</td>
+                                    <td class="fw-bold">${formatCurrency(p.net_pay)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            const resultsModal = new bootstrap.Modal(document.getElementById('payrollResultsModal'));
+            resultsModal.show();
+        }
+
+        // Process Payroll
+        function processPayroll() {
+            calculatePayroll();
+        }
+
+        // Confirm Payroll Processing
+        async function confirmPayrollProcessing() {
+            if (calculatedPayroll.length === 0) {
+                showAlert('No payroll data to process.', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/hr/process_payroll', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        payroll_data: calculatedPayroll
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Payroll processed successfully!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('payrollResultsModal')).hide();
+                    bootstrap.Modal.getInstance(document.getElementById('processPayrollModal')).hide();
+                    loadPayrollData();
+                } else {
+                    showAlert('Error processing payroll: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error processing payroll: ' + error.message, 'danger');
+            }
+        }
+
+        // Load Payroll Data
+        async function loadPayrollData() {
+            const period = document.getElementById('payroll_period').value;
+            const customMonth = document.getElementById('custom_month').value;
+
+            if (!period) {
+                showAlert('Please select a period.', 'warning');
+                return;
+            }
+
+            document.getElementById('payrollTableBody').innerHTML = '<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+
+            try {
+                const response = await fetch('/hr/load_payroll_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        period: period,
+                        custom_month: customMonth
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updatePayrollTable(result.payroll_data);
+                    updatePayrollSummary(result.summary);
+                } else {
+                    showAlert('Error loading payroll data: ' + result.error, 'danger');
+                    document.getElementById('payrollTableBody').innerHTML = '<tr><td colspan="9" class="text-center">No payroll data found</td></tr>';
+                }
+            } catch (error) {
+                showAlert('Error loading payroll data: ' + error.message, 'danger');
+                document.getElementById('payrollTableBody').innerHTML = '<tr><td colspan="9" class="text-center">Error loading data</td></tr>';
+            }
+        }
+
+        // Update Payroll Table
+        function updatePayrollTable(payrollData) {
+            const tbody = document.getElementById('payrollTableBody');
+            if (!payrollData || payrollData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No payroll data found for selected period</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = payrollData.map(payroll => `
+                <tr>
+                    <td>${payroll.employee_name}</td>
+                    <td>${payroll.department}</td>
+                    <td>${formatCurrency(payroll.base_salary)}</td>
+                    <td>${formatCurrency(payroll.overtime_pay || 0)}</td>
+                    <td>${formatCurrency(payroll.bonuses || 0)}</td>
+                    <td>${formatCurrency(payroll.total_deductions || 0)}</td>
+                    <td class="fw-bold text-success">${formatCurrency(payroll.net_pay)}</td>
+                    <td><span class="badge bg-${payroll.status === 'Approved' ? 'success' : 'warning'}">${payroll.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editPayroll('${payroll._id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="viewPayslip('${payroll._id}')">
+                            <i class="fas fa-file-invoice"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update Payroll Summary
+        function updatePayrollSummary(summary) {
+            if (summary) {
+                document.getElementById('totalMonthlyPayroll').textContent = formatCurrency(summary.total_monthly_payroll || 0);
+                document.getElementById('employeesProcessed').textContent = summary.payroll_employees_count || 0;
+                document.getElementById('pendingApprovals').textContent = summary.pending_payroll_count || 0;
+                document.getElementById('taxDeductions').textContent = formatCurrency(summary.total_tax_deductions || 0);
+            }
+        }
+
+        // Send Payroll to Finance
+        async function sendPayrollToFinance() {
+            const period = document.getElementById('payroll_period').value;
+            const customMonth = document.getElementById('custom_month').value;
+
+            if (!period) {
+                showAlert('Please select a period first.', 'warning');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to send payroll to Finance Department?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/hr/send_payroll_to_finance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        period: period,
+                        custom_month: customMonth
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Payroll sent to Finance Department successfully!', 'success');
+                } else {
+                    showAlert('Error sending payroll: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error sending payroll: ' + error.message, 'danger');
+            }
+        }
+
+        // Send Payment Report to Manager
+        async function sendPaymentReportToManager() {
+            const period = document.getElementById('payroll_period').value;
+            const customMonth = document.getElementById('custom_month').value;
+
+            if (!period) {
+                showAlert('Please select a period first.', 'warning');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to send payment report to Manager?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/hr/send_payment_report_to_manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        period: period,
+                        custom_month: customMonth
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Payment report sent to Manager successfully!', 'success');
+                } else {
+                    showAlert('Error sending report: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error sending report: ' + error.message, 'danger');
+            }
+        }
+
+        // Edit Payroll
+        function editPayroll(id) {
+            // Implement edit functionality
+            showAlert('Edit payroll functionality - Implementation pending', 'info');
+        }
+
+        // View Payslip
+        function viewPayslip(id) {
+            // Implement view payslip functionality
+            window.open(`/hr/payslip/${id}`, '_blank');
+        }
+
+        // Handle Leave Request
+        async function handleLeaveRequest(leaveId, action) {
+            if (!confirm(`Are you sure you want to ${action.toLowerCase()} this leave request?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/hr/leave_action/${leaveId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: action })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(`Leave request ${action.toLowerCase()} successfully!`, 'success');
+                    
+                    // Update the row in the table
+                    const row = document.getElementById(`leave_${leaveId}`);
+                    if (row) {
+                        const statusCell = row.querySelector('td:nth-child(3)');
+                        const actionsCell = row.querySelector('td:nth-child(4)');
+                        
+                        statusCell.innerHTML = `<small class="badge bg-${action === 'Approved' ? 'success' : 'danger'}">${action}</small>`;
+                        actionsCell.innerHTML = '';
+                    }
+                    
+                    // Update leave requests count
+                    refreshLeaveRequestsCount();
+                } else {
+                    showAlert(`Error ${action.toLowerCase()} leave request: ${result.error}`, 'danger');
+                }
+            } catch (error) {
+                showAlert(`Error ${action.toLowerCase()} leave request: ${error.message}`, 'danger');
+            }
+        }
+
+        // Handle Claim Request
+        async function handleClaimRequest(claimId, action) {
+            if (!confirm(`Are you sure you want to ${action.toLowerCase()} this claim request?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/hr/claim_action/${claimId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: action })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(`Claim request ${action.toLowerCase()} successfully!`, 'success');
+                    
+                    // Update the row in the table
+                    const row = document.getElementById(`claim_${claimId}`);
+                    if (row) {
+                        const statusCell = row.querySelector('td:nth-child(4)');
+                        const actionsCell = row.querySelector('td:nth-child(5)');
+                        
+                        statusCell.innerHTML = `<small class="badge bg-${action === 'Approved' ? 'success' : 'danger'}">${action}</small>`;
+                        actionsCell.innerHTML = '';
+                    }
+                    
+                    // Update claims count
+                    refreshClaimsCount();
+                } else {
+                    showAlert(`Error ${action.toLowerCase()} claim request: ${result.error}`, 'danger');
+                }
+            } catch (error) {
+                showAlert(`Error ${action.toLowerCase()} claim request: ${error.message}`, 'danger');
+            }
+        }
+
+        // Refresh Leave Requests Count
+        async function refreshLeaveRequestsCount() {
+            try {
+                const response = await fetch('/hr/get_leave_requests_count');
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('totalLeaveRequests').textContent = result.count;
+                }
+            } catch (error) {
+                console.error('Error refreshing leave requests count:', error);
+            }
+        }
+
+        // Refresh Claims Count
+        async function refreshClaimsCount() {
+            try {
+                const response = await fetch('/hr/get_claims_count');
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('totalClaims').textContent = result.count;
+                }
+            } catch (error) {
+                console.error('Error refreshing claims count:', error);
+            }
+        }
+
+        // Copy to Clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            element.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                showAlert('Copied to clipboard!', 'success');
+            } catch (err) {
+                // Fallback for modern browsers
+                navigator.clipboard.writeText(element.value).then(() => {
+                    showAlert('Copied to clipboard!', 'success');
+                }).catch(() => {
+                    showAlert('Failed to copy to clipboard', 'danger');
+                });
+            }
+        }
+
+        // Send Credentials Email
+        async function sendCredentialsEmail() {
+            const employeeName = document.getElementById('credentialEmployeeName').value;
+            const username = document.getElementById('generatedUsername').value;
+            const password = document.getElementById('generatedPassword').value;
+
+            try {
+                const response = await fetch('/hr/send_credentials_email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        employee_name: employeeName,
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Credentials sent successfully via email!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('credentialsModal')).hide();
+                } else {
+                    showAlert('Error sending email: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error sending email: ' + error.message, 'danger');
+            }
+        }
+
+        // Reset Password
+        async function resetPassword(employeeId) {
+            if (!confirm('Are you sure you want to reset this employee\'s password?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/hr/reset_password/' + employeeId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Password reset successfully. New password: ' + result.new_password, 'success');
+                } else {
+                    showAlert('Error resetting password: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error resetting password: ' + error.message, 'danger');
+            }
+        }
+
+        // Resend Credentials
+        async function resendCredentials(employeeId) {
+            if (!confirm('Are you sure you want to resend login credentials to this employee?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/hr/resend_credentials/' + employeeId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Credentials resent successfully!', 'success');
+                } else {
+                    showAlert('Error resending credentials: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error resending credentials: ' + error.message, 'danger');
+            }
+        }
+
+        // Add Position
+        async function addPosition(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('addPositionForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/hr/add_position', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Position added successfully!', 'success');
+                    form.reset();
+                    refreshPositionsCount();
+                } else {
+                    showAlert('Error adding position: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error adding position: ' + error.message, 'danger');
+            }
+        }
+
+        // Refresh Positions Count
+        async function refreshPositionsCount() {
+            try {
+                const response = await fetch('/hr/get_positions_count');
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('totalPositions').textContent = result.count;
+                }
+            } catch (error) {
+                console.error('Error refreshing positions count:', error);
+            }
+        }
+
+        // Set Department Budget
+        async function setDepartmentBudget(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('budgetForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/hr/set_department_budget', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        department: 'HR',
+                        ...data
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('HR Budget set successfully!', 'success');
+                    form.reset();
+                } else {
+                    showAlert('Error setting budget: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error setting budget: ' + error.message, 'danger');
+            }
+        }
+
+        // View Report
+        function viewReport(reportId) {
+            window.open(`/hr/report/${reportId}`, '_blank');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today for pay_date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pay_date').value = today;
+            document.getElementById('due_date').value = today;
+            
+            // Set default month to current month
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            document.getElementById('payroll_month').value = currentMonth;
+            document.getElementById('custom_month').value = currentMonth;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional Finance Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: 32px;
+      color: #1f2937;
+    }
+    .header p {
+      font-size: 18px;
+      color: #6b7280;
+    }
+
+    .section {
+      margin-bottom: 50px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .section h2 {
+      font-size: 24px;
+      color: #1f2937;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .card-body {
+      padding: 20px;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .card-text {
+      color: #6b7280;
+    }
+
+    .list-group-item {
+      border: none;
+      padding: 10px 0;
+    }
+
+    .progress {
+      height: 10px;
+      margin-top: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-control {
+      border-radius: 8px;
+    }
+    .btn-primary {
+      background-color: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      margin-right: 10px;
+    }
+
+    .card:hover {
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #2563eb;
+      transition: background-color 0.3s ease;
+    }
+
+    .section h2 i {
+      color: #3b82f6;
+    }
+
+    .progress-bar {
+      background-color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1><b>Finance Department</b></h1>
+  </div>
+
+  <!-- Overview Section -->
+  <div class="section">
+    <h2><i class="fas fa-chart-line me-2"></i> Overview</h2>
+    <div class="row">
+      {% if overview %}
+        {% for item in overview %}
+          <div class="col-md-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ item.title }}</h5>
+                <p class="card-text">{{ item.description }}</p>
+                {% if item.progress %}
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ item.progress }}%;" aria-valuenow="{{ item.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No overview data available.</p>
+      {% endif %}
+    </div>
+    <div class="mt-3">
+      <a href="#" class="btn btn-primary" id="view-account-summary-btn">View Account Summary</a>
+      <a href="#" class="btn btn-primary" id="monitor-cash-flow-btn">Monitor Cash Flow</a>
+      <a href="#" class="btn btn-primary" id="review-financial-performance-btn">Review Financial Performance</a>
+      <a href="#" class="btn btn-primary" id="download-financial-report-btn">Download Financial Report</a>
+      <a href="#" class="btn btn-primary" id="set-budget-goals-btn">Set Budget Goals</a>
+    </div>
+  </div>
+
+  <!-- Balances Section -->
+  <div class="section">
+    <h2><i class="fas fa-wallet me-2"></i> Balances</h2>
+    <div class="row">
+      {% if balances %}
+        {% for balance in balances %}
+          <div class="col-md-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ balance.account_type }}</h5>
+                <p class="card-text">${{ balance.amount }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No balances available.</p>
+      {% endif %}
+    </div>
+    <div class="mt-3">
+      <a href="#" class="btn btn-primary" id="connect-bank-account-btn">Connect Bank Account</a>
+      <a href="#" class="btn btn-primary" id="manage-accounts-btn">Manage Accounts</a>
+      <a href="#" class="btn btn-primary" id="reconcile-accounts-btn">Reconcile Accounts</a>
+    </div>
+  </div>
+
+  <!-- Transactions Section -->
+  <div class="section">
+    <h2><i class="fas fa-exchange-alt me-2"></i> Transactions</h2>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Recent Transactions</h5>
+        <ul class="list-group list-group-flush">
+          {% if transactions %}
+            {% for trans in transactions %}
+              <li class="list-group-item">{{ trans.date.strftime('%m/%d/%Y') }}: {{ trans.description }} - ${{ trans.amount }} {% if trans.amount > 0 %}+{% endif %}</li>
+            {% endfor %}
+          {% else %}
+            <li class="list-group-item">No recent transactions.</li>
+          {% endif %}
+        </ul>
+        <div class="mt-3">
+          <a href="{{ url_for('get_all_tasks') }}" class="btn btn-primary" id="view-transactions-btn">View All Transactions</a>
+          <a href="#" class="btn btn-primary" id="add-new-transaction-btn">Add New Transaction</a>
+          <a href="#" class="btn btn-primary" id="categorize-transactions-btn">Categorize Transactions</a>
+          <a href="#" class="btn btn-primary" id="import-transactions-btn">Import Transactions</a>
+          <a href="#" class="btn btn-primary" id="search-transactions-btn">Search Transactions</a>
+          <a href="#" class="btn btn-primary" id="edit-transaction-btn">Edit Transaction</a>
+          <a href="#" class="btn btn-primary" id="delete-transaction-btn">Delete Transaction</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ <!-- Incoming Budget Requests Section -->
+<div class="section mt-5">
+  <h2><i class="fas fa-hand-holding-usd me-2"></i> Incoming Budget Requests</h2>
+  <ul class="list-group">
+    {% if budget_requests %}
+      {% for request in budget_requests %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ request.department }}</strong>
+            <small class="text-muted">Submitted by: {{ request.submitted_by }}</small><br>
+            <small class="text-muted">Requested: ${{ "{:,.2f}".format(request.amount) }}</small><br>
+            <small class="text-muted">Purpose: {{ request.purpose }}</small><br>
+            <small>Status: <span class="badge bg-{{ 'success' if request.status == 'Approved' else 'warning' if request.status == 'Pending' else 'danger' }}">{{ request.status }}</span></small>
+          </div>
+          <div>
+            {% if request.status == 'Pending' %}
+              <a href="{{ url_for('approve_budget', request_id=request.id) }}" class="btn btn-sm btn-success me-2">Approve</a>
+              <a href="{{ url_for('reject_budget', request_id=request.id) }}" class="btn btn-sm btn-danger">Reject</a>
+            {% else %}
+              <a href="{{ url_for('view_report', request_id=request.id) }}" class="btn btn-sm btn-info">View Report</a>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    {% else %}
+      <li class="list-group-item">No budget requests at the moment.</li>
+    {% endif %}
+  </ul>
+</div>
+
+
+  <!-- Invoicing Section -->
+  <div class="section">
+    <h2><i class="fas fa-file-invoice me-2"></i> Invoicing</h2>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Manage Invoices</h5>
+        <div class="mt-3">
+          <a href="#" class="btn btn-primary" id="create-invoice-btn">Create Invoice</a>
+          <a href="#" class="btn btn-primary" id="send-invoice-btn">Send Invoice</a>
+          <a href="#" class="btn btn-primary" id="track-invoice-status-btn">Track Invoice Status</a>
+          <a href="#" class="btn btn-primary" id="record-payment-btn">Record Payment</a>
+          <a href="#" class="btn btn-primary" id="set-recurring-invoices-btn">Set Up Recurring Invoices</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expenses Section -->
+  <div class="section">
+    <h2><i class="fas fa-receipt me-2"></i> Expenses</h2>
+    <div class="row">
+      {% if expenses %}
+        {% for expense in expenses %}
+          <div class="col-md-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ expense.category }}</h5>
+                <p class="card-text">${{ expense.amount }} this month</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No expenses available.</p>
+      {% endif %}
+    </div>
+    <div class="mt-3">
+      <a href="{{ url_for('add_position') }}" class="btn btn-primary" id="add-expense-btn">Add New Expense</a>
+    </div>
+  </div>
+
+  <!-- Budgeting Section -->
+  <div class="section">
+    <h2><i class="fas fa-piggy-bank me-2"></i> Budgeting</h2>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Manage Budgets</h5>
+        <div class="mt-3">
+          <a href="#" class="btn btn-primary" id="create-budget-btn">Create a Budget</a>
+          <a href="#" class="btn btn-primary" id="adjust-budget-btn">Adjust Budget</a>
+          <a href="#" class="btn btn-primary" id="track-budget-progress-btn">Track Budget Progress</a>
+          <a href="#" class="btn btn-primary" id="forecast-cash-flow-btn">Forecast Cash Flow</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Goals Section -->
+  <div class="section">
+    <h2><i class="fas fa-bullseye me-2"></i> Goals</h2>
+    <div class="row">
+      {% if goals %}
+        {% for goal in goals %}
+          <div class="col-md-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ goal.title }}</h5>
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: {{ goal.progress }}%;" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="100">{{ goal.progress }}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No goals set.</p>
+      {% endif %}
+    </div>
+    <div class="mt-3">
+      <a href="{{ url_for('order_new') }}" class="btn btn-primary" id="set-goal-btn">Set New Goal</a>
+      <a href="#" class="btn btn-primary" id="set-financial-goals-btn">Set Financial Goals</a>
+    </div>
+  </div>
+
+  <!-- Analytics Section -->
+  <div class="section">
+    <h2><i class="fas fa-chart-bar me-2"></i> Analytics</h2>
+    <div class="row">
+      {% if analytics %}
+        <div class="col-md-6 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Spending Trends</h5>
+              <canvas id="spendingChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Income vs Expenses</h5>
+              <canvas id="incomeExpenseChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Category Breakdown</h5>
+              <ul class="list-group list-group-flush">
+                {% if analytics.categories %}
+                  {% for category in analytics.categories %}
+                    <li class="list-group-item d-flex justify-content-between">
+                      <span>{{ category["_id"] }}</span>
+                      <span class="badge bg-primary">${{ category["total"] }}</span>
+                    </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item">No category data found.</li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Monthly Summary</h5>
+              {% if analytics.monthly %}
+                <p class="card-text">Total Income: ${{ analytics.monthly.income }}</p>
+                <p class="card-text">Total Expenses: ${{ analytics.monthly.expenses }}</p>
+                <p class="card-text">Net Savings: ${{ analytics.monthly.savings }}</p>
+              {% else %}
+                <p class="card-text">No monthly summary available.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <p>No analytics data available.</p>
+      {% endif %}
+    </div>
+    <div class="mt-3">
+      <a href="#" class="btn btn-primary" id="analyze-spending-trends-btn">Analyze Spending Trends</a>
+      <a href="#" class="btn btn-primary" id="compare-performance-btn">Compare Performance</a>
+    </div>
+  </div>
+
+  <!-- Reports Section -->
+  <div class="section">
+    <h2><i class="fas fa-file-alt me-2"></i> Reports</h2>
+    <div class="row">
+      {% if reports %}
+        <div class="col-md-12 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Generate Reports</h5>
+              <form method="POST" action="{{ url_for('finance_generate_report') }}" id="generate-report-form">
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label for="reportType">Report Type</label>
+                    <select class="form-control" id="reportType" name="reportType">
+                      <option value="monthly">Monthly Statement</option>
+                      <option value="quarterly">Quarterly Summary</option>
+                      <option value="annual">Annual Report</option>
+                      <option value="tax">Tax Report</option>
+                      <option value="profit_loss">Profit & Loss</option>
+                      <option value="balance_sheet">Balance Sheet</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate">
+                  </div>
+                  <div class="col-md-4 form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="generate-report-btn">Generate Report</button>
+                <a href="#" class="btn btn-primary" id="generate-profit-loss-btn">Generate Profit & Loss Report</a>
+                <a href="#" class="btn btn-primary" id="run-balance-sheet-btn">Run Balance Sheet</a>
+                <a href="#" class="btn btn-primary" id="export-tax-report-btn">Export Tax Report</a>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Recent Reports</h5>
+              <ul class="list-group list-group-flush">
+                {% for report in reports.recent %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ report.name }} - {{ report.date.strftime('%m/%d/%Y') }}</span>
+                    <a href="{{ url_for('finance_download_report', report_id=report.id) }}" class="btn btn-sm btn-outline-primary download-report-btn" data-report-id="{{ report.id }}">
+                      <i class="fas fa-download"></i> Download
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <p>No reports available.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Tax and Compliance Section -->
+  <div class="section">
+    <h2><i class="fas fa-balance-scale me-2"></i> Tax and Compliance</h2>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Tax Management</h5>
+        <div class="mt-3">
+          <a href="#" class="btn btn-primary" id="estimate-taxes-btn">Estimate Taxes</a>
+          <a href="#" class="btn btn-primary" id="track-deductible-expenses-btn">Track Deductible Expenses</a>
+          <a href="#" class="btn btn-primary" id="export-tax-documents-btn">Export Tax Documents</a>
+          <a href="#" class="btn btn-primary" id="review-compliance-status-btn">Review Compliance Status</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collaboration Section -->
+  <div class="section">
+    <h2><i class="fas fa-users me-2"></i> Collaboration</h2>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Team Collaboration</h5>
+        <div class="mt-3">
+          <a href="#" class="btn btn-primary" id="invite-team-member-btn">Invite Team Member</a>
+          <a href="#" class="btn btn-primary" id="share-report-btn">Share Report</a>
+          <a href="#" class="btn btn-primary" id="assign-roles-btn">Assign Roles</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Section -->
+  <div class="section">
+    <h2><i class="fas fa-cog me-2"></i> Settings</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Account Settings</h5>
+            <form method="POST" action="{{ url_for('finance_update_settings') }}" id="account-settings-form">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ current_user.name if current_user else '' }}" placeholder="Enter your name">
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email if current_user else '' }}" placeholder="Enter your email">
+              </div>
+              <button type="submit" class="btn btn-primary" id="save-changes-btn">Save Changes</button>
+              <a href="#" class="btn btn-primary" id="update-password-btn">Update Password</a>
+              <a href="#" class="btn btn-primary" id="enable-2fa-btn">Enable Two-Factor Authentication</a>
+              <a href="#" class="btn btn-primary" id="update-billing-info-btn">Update Billing Information</a>
+              <a href="#" class="btn btn-primary" id="export-account-data-btn">Export Account Data</a>
+              <a href="#" class="btn btn-primary" id="log-out-btn">Log Out</a>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Notification Settings</h5>
+            <form method="POST" action="{{ url_for('finance_update_notifications') }}" id="notification-settings-form">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="emailAlerts" name="emailAlerts" {% if notifications.email %}checked{% endif %}>
+                <label class="form-check-label" for="emailAlerts">Email Alerts</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="smsAlerts" name="smsAlerts" {% if notifications.sms %}checked{% endif %}>
+                <label class="form-check-label" for="smsAlerts">SMS Alerts</label>
+              </div>
+              <button type="submit" class="btn btn-primary mt-3" id="update-preferences-btn">Update Preferences</button>
+              <a href="#" class="btn btn-primary mt-3" id="set-up-alerts-btn">Set Up Alerts</a>
+              <a href="#" class="btn btn-primary mt-3" id="review-alerts-btn">Review Alerts</a>
+              <a href="#" class="btn btn-primary mt-3" id="enable-auto-reminders-btn">Enable Auto-Reminders</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Support Section -->
+  <div class="section">
+    <h2><i class="fas fa-question-circle me-2"></i> Help and Support</h2>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Support Options</h5>
+        <div class="mt-3">
+          <a href="#" class="btn btn-primary" id="get-help-btn">Get Help</a>
+          <a href="#" class="btn btn-primary" id="view-tutorials-btn">View Tutorials</a>
+          <a href="#" class="btn btn-primary" id="explore-faqs-btn">Explore FAQs</a>
+          <a href="#" class="btn btn-primary" id="schedule-consultation-btn">Schedule a Consultation</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript to add functionality to buttons
+
+    // Existing Event Listeners
+    document.getElementById('view-transactions-btn').addEventListener('click', function(event) {
+      if (!confirm('Do you want to view all transactions?')) {
+        event.preventDefault();
+      } else {
+        alert('Redirecting to view all transactions...');
+      }
+    });
+
+    document.getElementById('add-expense-btn').addEventListener('click', function(event) {
+      if (!confirm('Do you want to add a new expense?')) {
+        event.preventDefault();
+      } else {
+        alert('Redirecting to add new expense...');
+      }
+    });
+
+    document.getElementById('set-goal-btn').addEventListener('click', function(event) {
+      if (!confirm('Do you want to set a new goal?')) {
+        event.preventDefault();
+      } else {
+        alert('Redirecting to set new goal...');
+      }
+    });
+
+    document.getElementById('generate-report-form').addEventListener('submit', function(event) {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        alert('Start date cannot be after end date.');
+        event.preventDefault();
+      } else if (!confirm('Generate this report?')) {
+        event.preventDefault();
+      } else {
+        alert('Generating report...');
+      }
+    });
+
+    const downloadBtns = document.querySelectorAll('.download-report-btn');
+    downloadBtns.forEach(btn => {
+      btn.addEventListener('click', function(event) {
+        const reportId = btn.getAttribute('data-report-id');
+        if (!confirm(`Download report ID ${reportId}?`)) {
+          event.preventDefault();
+        } else {
+          alert(`Downloading report ID ${reportId}...`);
+        }
+      });
+    });
+
+    document.getElementById('account-settings-form').addEventListener('submit', function(event) {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      if (!name || !email) {
+        alert('Name and email are required.');
+        event.preventDefault();
+      } else if (!email.includes('@')) {
+        alert('Invalid email format.');
+        event.preventDefault();
+      } else if (!confirm('Save account changes?')) {
+        event.preventDefault();
+      } else {
+        alert('Saving changes...');
+      }
+    });
+
+    document.getElementById('notification-settings-form').addEventListener('submit', function(event) {
+      if (!confirm('Update notification preferences?')) {
+        event.preventDefault();
+      } else {
+        alert('Updating preferences...');
+      }
+    });
+
+    // New Event Listeners for Added Prompts
+    const newButtons = [
+      'view-account-summary-btn', 'monitor-cash-flow-btn', 'review-financial-performance-btn', 
+      'download-financial-report-btn', 'set-budget-goals-btn', 'connect-bank-account-btn', 
+      'manage-accounts-btn', 'reconcile-accounts-btn', 'add-new-transaction-btn', 
+      'categorize-transactions-btn', 'import-transactions-btn', 'search-transactions-btn', 
+      'edit-transaction-btn', 'delete-transaction-btn', 'pay-bill-btn', 'create-invoice-btn', 
+      'send-invoice-btn', 'track-invoice-status-btn', 'record-payment-btn', 
+      'set-recurring-invoices-btn', 'create-budget-btn', 'adjust-budget-btn', 
+      'track-budget-progress-btn', 'forecast-cash-flow-btn', 'set-financial-goals-btn', 
+      'analyze-spending-trends-btn', 'compare-performance-btn', 'generate-profit-loss-btn', 
+      'run-balance-sheet-btn', 'export-tax-report-btn', 'estimate-taxes-btn', 
+      'track-deductible-expenses-btn', 'export-tax-documents-btn', 'review-compliance-status-btn', 
+      'invite-team-member-btn', 'share-report-btn', 'assign-roles-btn', 'update-password-btn', 
+      'enable-2fa-btn', 'update-billing-info-btn', 'export-account-data-btn', 'log-out-btn', 
+      'set-up-alerts-btn', 'review-alerts-btn', 'enable-auto-reminders-btn', 'get-help-btn', 
+      'view-tutorials-btn', 'explore-faqs-btn', 'schedule-consultation-btn'
+    ];
+
+    newButtons.forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.addEventListener('click', function(event) {
+          event.preventDefault();
+          alert(`Executing ${btn.textContent}...`);
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

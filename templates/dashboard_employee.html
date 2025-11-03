@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block content %}
+<!-- Bootstrap 5 CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<!-- Bootstrap Icons CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="container mt-5">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-primary bg-gradient text-white rounded-3 shadow-sm">
+        <h2 class="mb-0">Employee Dashboard</h2>
+        <div class="d-flex align-items-center">
+            <span class="me-3 fw-medium">Welcome, {{ user.name }} ({{ user.role | capitalize }})</span>
+            <div class="dropdown">
+                <button class="btn btn-outline-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-1"></i> Account
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenu">
+                    <li><a class="dropdown-item" href="/employee/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" href="/employee/settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <div class="row mb-5 g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-list-task text-primary fs-2 mb-2"></i>
+                    <h6 class="card-title text-muted mb-2">Pending Tasks</h6>
+                    <h3 class="text-primary fw-bold">{{ user.pending_tasks_count | default(0) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock text-primary fs-2 mb-2"></i>
+                    <h6 class="card-title text-muted mb-2">Hours Logged Today</h6>
+                    <h3 class="text-primary fw-bold">{{ user.hours_logged_today | default(0) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-x text-primary fs-2 mb-2"></i>
+                    <h6 class="card-title text-muted mb-2">Pending Leave Requests</h6>
+                    <h3 class="text-primary fw-bold">{{ user.pending_leaves_count | default(0) }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5 g-3">
+        <!-- Tasks -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold"><i class="bi bi-list-task me-2"></i>My Tasks</h5>
+                    <p class="card-text text-muted">View and update your assigned tasks.</p>
+                    <a href="/employee/tasks" class="btn btn-primary w-100">Go</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Tracking -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold"><i class="bi bi-clock me-2"></i>Time Tracking</h5>
+                    <p class="card-text text-muted">Log hours worked and monitor productivity.</p>
+                    <a href="/employee/timetracking" class="btn btn-primary w-100">Go</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Requests -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold"><i class="bi bi-calendar-x me-2"></i>Leave Request</h5>
+                    <form method="POST" action="/employee/leaves">
+                        <div class="mb-3">
+                            <label for="reason" class="form-label fw-medium">Reason for Leave</label>
+                            <input type="text" name="reason" id="reason" class="form-control" placeholder="Reason for leave" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="from_date" class="form-label fw-medium">From Date</label>
+                            <input type="date" name="from_date" id="from_date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="to_date" class="form-label fw-medium">To Date</label>
+                            <input type="date" name="to_date" id="to_date" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5 g-3">
+        <!-- Claims -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold"><i class="bi bi-receipt me-2"></i>Submit Claim</h5>
+                    <form method="POST" action="/employee/claims">
+                        <div class="mb-3">
+                            <label for="claim_type" class="form-label fw-medium">Claim Type</label>
+                            <select name="type" id="claim_type" class="form-select" required>
+                                <option value="" disabled selected>Select claim type</option>
+                                <option value="Travel">Travel</option>
+                                <option value="Medical">Medical</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label fw-medium">Amount</label>
+                            <input type="number" name="amount" id="amount" class="form-control" placeholder="Amount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="details" class="form-label fw-medium">Details</label>
+                            <textarea name="details" id="details" class="form-control" placeholder="Details" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Feedback -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow h-100 rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold"><i class="bi bi-chat-left-text me-2"></i>Performance Feedback</h5>
+                    <form method="POST" action="/employee/performance">
+                        <div class="mb-3">
+                            <label for="feedback" class="form-label fw-medium">Feedback</label>
+                            <textarea name="feedback" id="feedback" class="form-control" placeholder="Enter your self-assessment or feedback" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold"><i class="bi bi-activity me-2"></i>Recent Activity</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for activity in recent_activities %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ activity.description }}</span>
+                                <span class="text-muted small">{{ activity.timestamp.strftime("%m/%d/%Y") }}</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item text-muted">No recent activity</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .container {
+            max-width: 1400px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #ffffff, #f1f3f5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-color: #0052cc;
+            border-color: #0052cc;
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 10px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #003d99;
+            border-color: #003d99;
+            transform: scale(1.02);
+        }
+        .btn-outline-light {
+            border-color: #ffffff;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+        .btn-outline-light:hover {
+            background-color: #ffffff;
+            color: #0052cc;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #0052cc;
+            box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+        }
+        .dropdown-menu {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+        .dropdown-item {
+            border-radius: 6px;
+            padding: 8px 12px;
+            transition: background-color 0.2s ease;
+        }
+        .dropdown-item:hover {
+            background-color: #f1f3f5;
+        }
+        .list-group-item {
+            border: none;
+            padding: 12px 0;
+            background: transparent;
+        }
+        .bg-primary.bg-gradient {
+            background: linear-gradient(90deg, #0052cc, #007bff);
+        }
+        h2, h5, h6 {
+            color: #1a1a1a;
+        }
+        .text-muted {
+            color: #6c757d !important;
+        }
+        .fw-semibold {
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .card {
+                margin-bottom: 15px;
+            }
+            .d-flex.justify-content-between.align-items-center {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            .btn-primary {
+                padding: 8px;
+            }
+        }
+    </style>
+</div>
+
+<!-- Bootstrap 5 JS (for dropdown functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+{% endblock %}

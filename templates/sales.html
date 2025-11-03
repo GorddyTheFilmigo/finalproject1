@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Sales Department Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #3498db 100%);
+            padding: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .admin-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 0.5rem;
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+
+        .admin-info h5 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .admin-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-section {
+            margin-bottom: 2rem;
+        }
+
+        .menu-section-title {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: #f39c12;
+            text-decoration: none;
+        }
+
+        .menu-item.active {
+            background: rgba(255,255,255,0.15);
+            border-left-color: #f39c12;
+            color: white;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+
+        .main-content {
+            margin-left: 280px;
+        }
+        .section {
+    margin-left: 250px;  /* Adjust this value to match your sidebar's width, e.g., 250px for a typical sidebar */
+    padding: 20px;       /* Optional: Add some breathing room */
+}
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Keep all your original styles */
+        .btn-purple {
+            background-color: #6610f2;
+            border-color: #6610f2;
+            color: white;
+        }
+        .btn-purple:hover {
+            background-color: #5a0fd4;
+            border-color: #5a0fd4;
+        }
+        .pipeline-stage {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .pipeline-stage:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="admin-profile">
+                <div class="admin-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="admin-info">
+                    <h5>Admin Panel</h5>
+                    <p>Sales Manager</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-section">
+                <div class="menu-section-title">Main Menu</div>
+                <a href="#" class="menu-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="milestones.html" class="menu-item">
+                    <i class="fas fa-flag-checkered"></i>
+                    Milestones
+                </a>
+                <a href="orders.html" class="menu-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    Orders
+                </a>
+                <a href="inventory.html" class="menu-item">
+                    <i class="fas fa-boxes"></i>
+                    Inventory
+                </a>
+                <a href="shipments.html" class="menu-item">
+                    <i class="fas fa-truck"></i>
+                    Shipments
+                </a>
+                <a href="supplies.html" class="menu-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    Supplies
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Team Management</div>
+                <a href="products.html" class="menu-item">
+                    <i class="fas fa-cube"></i>
+                    Products
+                </a>
+                <a href="sales-center.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    Sales Center
+                </a>
+                <a href="libraries.html" class="menu-item">
+                    <i class="fas fa-book"></i>
+                    Libraries
+                </a>
+                <a href="samples.html" class="menu-item">
+                    <i class="fas fa-flask"></i>
+                    Samples
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Your Original Dashboard Content - Preserved Exactly -->
+    <div class="main-content">
+        <div class="container-fluid p-4" style="background: #f8f9fa; min-height: 100vh;">
+            <h2 class="mb-4 text-center">Sales Department Dashboard</h2>
+             <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <img src="https://via.placeholder.com/150x40/3b82f6/ffffff?text=MyShop" alt="Logo" class="logo">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/products">Products/Services</a></li>
+          <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="/cart">
+              <i class="bi bi-cart3"></i> Cart <span class="badge bg-primary" id="cartCount">0</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+            <!-- AI Sales Assistant - NEW -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #6610f2;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">AI Sales Assistant</h5>
+                            <div>
+                                <button class="btn btn-purple btn-sm" onclick="generateSalesTip()">Get AI Tip</button>
+                                <button class="btn btn-info btn-sm ms-2" data-bs-toggle="collapse" data-bs-target="#aiChatSection" aria-expanded="false">
+                                    AI Chat
+                                </button>
+                            </div>
+                        </div>
+                        <div class="collapse" id="aiChatSection">
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div id="aiChatHistory" style="height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: white;"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <input type="text" class="form-control" id="aiQuery" placeholder="Ask AI for sales advice... (e.g., 'How to close a deal?')">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary" onclick="askAI()">Send</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <!-- 1. PAGE HEADER -->
+
+  <!-- Progress Bar -->
+  <div class="container my-4">
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="row text-center">
+      <div class="col step active"><i class="bi bi-cart"></i> Order</div>
+      <div class="col step"><i class="bi bi-credit-card"></i> Payment</div>
+      <div class="col step"><i class="bi bi-check-circle"></i> Confirmation</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <!-- LEFT: Main Form -->
+      <div class="col-lg-8">
+
+        <!-- 2. PRODUCT/SERVICE SUMMARY -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-box-seam text-primary"></i> Order Summary</h5>
+            <div id="productsContainer" class="mb-3">
+              <!-- Dynamically loaded items -->
+            </div>
+            <div class="text-end">
+              <strong>Subtotal: <span id="subtotal">KES 0</span></strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. CUSTOMER INFORMATION -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-person text-primary"></i> Customer Information</h5>
+            <form id="checkoutForm">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Full Name *</label>
+                  <input type="text" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email Address *</label>
+                  <input type="email" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Phone Number *</label>
+                  <input type="tel" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Company Name (Optional)</label>
+                  <input type="text" class="form-control">
+                </div>
+
+                <!-- Delivery Address -->
+                <div class="col-12">
+                  <h6>Delivery Address</h6>
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label">Street Address *</label>
+                  <input type="text" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">City / Town *</label>
+                  <input type="text" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Region / County *</label>
+                  <input type="text" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Postal Code *</label>
+                  <input type="text" class="form-control" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Notes / Special Instructions</label>
+                  <textarea class="form-control" rows="2" placeholder="e.g., Deliver after 2 PM"></textarea>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- 4. DELIVERY OPTIONS -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-truck text-primary"></i> Delivery Method</h5>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="delivery" id="standard" value="standard" checked onchange="updateTotal()">
+              <label class="form-check-label" for="standard">
+                <strong>Standard Delivery</strong> — 3-5 business days — <span class="text-success">KES 300</span>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="delivery" id="express" value="express" onchange="updateTotal()">
+              <label class="form-check-label" for="express">
+                <strong>Express Delivery</strong> — 1-2 business days — <span class="text-success">KES 800</span>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="delivery" id="pickup" value="pickup" onchange="updateTotal()">
+              <label class="form-check-label" for="pickup">
+                <strong>Pickup from Store</strong> — Same day — <span class="text-success">Free</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. SCHEDULING -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-calendar text-primary"></i> Preferred Delivery Date & Time</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Date</label>
+                <input type="date" class="form-control" min="">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Time Slot</label>
+                <select class="form-select">
+                  <option>Morning (8AM - 12PM)</option>
+                  <option>Afternoon (12PM - 5PM)</option>
+                  <option>Evening (5PM - 8PM)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. PAYMENT METHOD -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-credit-card text-primary"></i> Payment Method</h5>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment" id="card" checked>
+              <label class="form-check-label" for="card">
+                <i class="bi bi-credit-card-2-front"></i> Credit / Debit Card
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment" id="mpesa">
+              <label class="form-check-label" for="mpesa">
+                <i class="bi bi-phone"></i> M-Pesa
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment" id="paypal">
+              <label class="form-check-label" for="paypal">
+                <i class="bi bi-paypal"></i> PayPal
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment" id="cod">
+              <label class="form-check-label" for="cod">
+                <i class="bi bi-cash"></i> Cash on Delivery
+              </label>
+            </div>
+
+            <div class="mt-3">
+              <label class="form-label">Promo Code</label>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Enter code" id="promoInput">
+                <button class="btn btn-outline-primary" onclick="applyPromo()">Apply</button>
+              </div>
+            </div>
+
+            <div class="mt-3 d-flex justify-content-center payment-icons">
+              <img src="https://via.placeholder.com/50x30/4CAF50/ffffff?text=SSL" alt="SSL">
+              <img src="https://via.placeholder.com/40x30/1A1F71/ffffff?text=Visa" alt="Visa">
+              <img src="https://via.placeholder.com/40x30/003087/ffffff?text=Master" alt="Mastercard">
+              <img src="https://via.placeholder.com/40x30/FF5F00/ffffff?text=M-Pesa" alt="M-Pesa">
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. TERMS -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="terms" required>
+              <label class="form-check-label" for="terms">
+                I agree to the <a href="/terms" target="_blank">Terms and Conditions</a> and 
+                <a href="/privacy" target="_blank">Privacy Policy</a>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. SUBMIT -->
+        <button class="btn btn-place-order" onclick="placeOrder()">
+          <span id="btnText">Place Order</span>
+          <span id="btnLoader" class="spinner-border spinner-border-sm" style="display:none;"></span>
+        </button>
+
+      </div>
+
+      <!-- 6. ORDER SUMMARY -->
+      <div class="col-lg-4">
+        <div class="summary-card">
+          <h5 class="mb-3">Order Summary</h5>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <span id="summarySubtotal">KES 0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Shipping</span>
+            <span id="summaryShipping">KES 0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Tax (VAT 16%)</span>
+            <span id="summaryTax">KES 0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-3 text-success">
+            <span>Discount</span>
+            <span id="summaryDiscount">- KES 0</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between mb-3">
+            <strong>Grand Total</strong>
+            <strong class="total-price" id="grandTotal">KES 0</strong>
+          </div>
+          <small class="text-muted">Secure checkout • SSL encrypted</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. CONFIRMATION MODAL -->
+  <div class="modal fade" id="confirmationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-success"><i class="bi bi-check-circle-fill"></i> Order Confirmed!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <h4>Order #<span id="orderNumber"></span></h4>
+          <p>Thank you for your purchase!</p>
+          <p><strong>Estimated Delivery:</strong> <span id="estDelivery"></span></p>
+          <p>A confirmation email has been sent to your inbox.</p>
+          <button class="btn btn-outline-primary" onclick="printReceipt()">Print Receipt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let cartItems = [];
+    let shipping = 300;
+    let discount = 0;
+
+    async function loadCart() {
+      try {
+        const res = await fetch('/api/cart');  // Fetch from Flask API
+        cartItems = await res.json();
+
+        document.getElementById('cartCount').textContent = cartItems.length;
+
+        const container = document.getElementById('productsContainer');
+        container.innerHTML = cartItems.map(item => `
+          <div class="d-flex align-items-center mb-3" data-id="${item.id}">
+            <img src="${item.image || 'https://via.placeholder.com/80'}" alt="${item.name}" class="product-img me-3">
+            <div class="flex-grow-1">
+              <h6 class="mb-1">${item.name}</h6>
+              <p class="text-muted small mb-1">${item.description}</p>
+              <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', -1)">-</button>
+                <input type="number" class="form-control quantity-input mx-2" value="${item.quantity}" min="1" onchange="updateItemQty('${item.id}', this.value)">
+                <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', 1)">+</button>
+                <span class="ms-3">KES ${item.price.toLocaleString()}</span>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-danger ms-3" onclick="removeItem('${item.id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        `).join('');
+
+        updateTotal();
+      } catch (err) {
+        console.error('Failed to load cart:', err);
+      }
+    }
+
+    function updateQty(id, change) {
+      const input = document.querySelector(`[data-id="${id}"] .quantity-input`);
+      let qty = parseInt(input.value) || 1;
+      qty = Math.max(1, qty + change);
+      input.value = qty;
+      updateItemQty(id, qty);
+    }
+
+    function updateItemQty(id, qty) {
+      const item = cartItems.find(i => i.id === id);
+      if (item) item.quantity = qty;
+      updateTotal();
+    }
+
+    function removeItem(id) {
+      cartItems = cartItems.filter(i => i.id !== id);
+      loadCart();  // Reload to reflect removal
+    }
+
+    function applyPromo() {
+      const code = document.getElementById('promoInput').value.trim();
+      discount = code === 'SAVE10' ? calculateSubtotal() * 0.10 : 0;
+      updateTotal();
+      alert(discount > 0 ? 'Promo applied!' : 'Invalid code');
+    }
+
+    function calculateSubtotal() {
+      return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+
+    function updateTotal() {
+      const subtotal = calculateSubtotal();
+      const delivery = document.querySelector('input[name="delivery"]:checked')?.value || 'standard';
+      shipping = delivery === 'express' ? 800 : delivery === 'pickup' ? 0 : 300;
+      const tax = subtotal * 0.16;
+      const total = subtotal + shipping + tax - discount;
+
+      document.getElementById('summarySubtotal').textContent = `KES ${subtotal.toLocaleString()}`;
+      document.getElementById('summaryShipping').textContent = `KES ${shipping.toLocaleString()}`;
+      document.getElementById('summaryTax').textContent = `KES ${Math.round(tax).toLocaleString()}`;
+      document.getElementById('summaryDiscount').textContent = `- KES ${discount.toLocaleString()}`;
+      document.getElementById('grandTotal').textContent = `KES ${Math.round(total).toLocaleString()}`;
+    }
+
+    async function placeOrder() {
+      const form = document.getElementById('checkoutForm');
+      if (!form.checkValidity() || !document.getElementById('terms').checked) {
+        alert('Please complete all required fields and agree to terms.');
+        return;
+      }
+
+      document.getElementById('btnText').style.display = 'none';
+      document.getElementById('btnLoader').style.display = 'inline-block';
+
+      // Simulate API call to save order
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: cartItems,
+            customer: { /* extract from form */ },
+            // Add other data
+          })
+        });
+        const data = await res.json();
+
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        document.getElementById('orderNumber').textContent = data.order_id || Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('estDelivery').textContent = 
+          document.querySelector('input[name="delivery"]:checked').value === 'express' ? '1-2 days' : '3-5 days';
+        modal.show();
+      } catch (err) {
+        alert('Error placing order');
+      } finally {
+        document.getElementById('btnText').style.display = 'inline';
+        document.getElementById('btnLoader').style.display = 'none';
+      }
+    }
+
+    function printReceipt() {
+      window.print();
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', loadCart);
+    document.querySelector('input[type="date"]').min = new Date().toISOString().split('T')[0];
+  </script>
+
+            <!-- Sales Overview Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card shadow-sm text-center" style="border: none; border-top: 4px solid #007bff;">
+                        <div class="card-body">
+                            <h5>Total Revenue</h5>
+                            <h2 class="text-success" id="totalRevenue">KES 0</h2>
+                            <small class="text-muted">This Month</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm text-center" style="border: none; border-top: 4px solid #28a745;">
+                        <div class="card-body">
+                            <h5>Active Leads</h5>
+                            <h2 class="text-info" id="activeLeads">0</h2>
+                            <small class="text-muted">Pipeline</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm text-center" style="border: none; border-top: 4px solid #ffc107;">
+                        <div class="card-body">
+                            <h5>Conversion Rate</h5>
+                            <h2 class="text-warning" id="conversionRate">0%</h2>
+                            <small class="text-muted">This Quarter</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm text-center" style="border: none; border-top: 4px solid #dc3545;">
+                        <div class="card-body">
+                            <h5>Open Deals</h5>
+                            <h2 class="text-danger" id="openDeals">0</h2>
+                            <small class="text-muted" id="openDealsValue">Value: KES 0</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Pipeline Section -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #17a2b8;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Sales Pipeline</h5>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addDealModal">+ Add Deal</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <h6>Leads</h6>
+                                    <div class="pipeline-stage bg-light p-3 rounded" onclick="filterPipeline('lead')">
+                                        <small id="leadsCount">0</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h6>Qualified</h6>
+                                    <div class="pipeline-stage bg-light p-3 rounded" onclick="filterPipeline('qualified')">
+                                        <small id="qualifiedCount">0</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h6>Proposal</h6>
+                                    <div class="pipeline-stage bg-light p-3 rounded" onclick="filterPipeline('proposal')">
+                                        <small id="proposalCount">0</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h6>Negotiation</h6>
+                                    <div class="pipeline-stage bg-light p-3 rounded" onclick="filterPipeline('negotiation')">
+                                        <small id="negotiationCount">0</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h6>Closed Won</h6>
+                                    <div class="pipeline-stage bg-success text-white p-3 rounded" onclick="filterPipeline('closed_won')">
+                                        <small id="closedWonCount">0</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h6>Closed Lost</h6>
+                                    <div class="pipeline-stage bg-danger text-white p-3 rounded" onclick="filterPipeline('closed_lost')">
+                                        <small id="closedLostCount">0</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive mt-4">
+                                <table class="table table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Deal Name</th>
+                                            <th>Salesperson</th>
+                                            <th>Customer</th>
+                                            <th>Amount</th>
+                                            <th>Stage</th>
+                                            <th>Expected Close</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pipelineTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Management Sections -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #6f42c1;">
+                        <div class="card-header">
+                            <h5 class="mb-0">Customers</h5>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-success btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#addCustomerModal">+ Add Customer</button>
+                            <div class="table-responsive">
+                                <table class="table table-sm" id="customersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #fd7e14;">
+                        <div class="card-header">
+                            <h5 class="mb-0">Leads</h5>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-primary btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#addLeadModal">+ Add Lead</button>
+                            <div class="table-responsive">
+                                <table class="table table-sm" id="leadsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Source</th>
+                                            <th>Interest Level</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #198754;">
+                        <div class="card-header">
+                            <h5 class="mb-0">Salespersons</h5>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-info btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#addSalespersonModal">+ Add Salesperson</button>
+                            <div class="table-responsive">
+                                <table class="table table-sm" id="salespersonsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Sales Entry Section -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #ffc107;">
+                        <div class="card-header">
+                            <h5 class="mb-0">Enter Monthly Sales</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="monthlySalesForm">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="monthlySalespersonSelect" class="form-label">Salesperson</label>
+                                        <select class="form-select" id="monthlySalespersonSelect" required>
+                                            <option value="">Select Salesperson</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="monthlyMonthSelect" class="form-label">Month</label>
+                                        <select class="form-select" id="monthlyMonthSelect" required>
+                                            <option value="">Select Month</option>
+                                            <option value="0">January</option>
+                                            <option value="1">February</option>
+                                            <option value="2">March</option>
+                                            <option value="3">April</option>
+                                            <option value="4">May</option>
+                                            <option value="5">June</option>
+                                            <option value="6">July</option>
+                                            <option value="7">August</option>
+                                            <option value="8">September</option>
+                                            <option value="9">October</option>
+                                            <option value="10">November</option>
+                                            <option value="11">December</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="monthlySalesAmount" class="form-label">Sales Amount (KES)</label>
+                                        <input type="number" class="form-control" id="monthlySalesAmount" step="0.01" required>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="button" class="btn btn-primary" onclick="submitMonthlySales()">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Reports Section -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #20c997;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Sales Reports</h5>
+                            <div>
+                                <select class="form-select form-select-sm me-2" id="reportPeriod" style="display: inline-block; width: auto;">
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                                <button class="btn btn-outline-primary btn-sm" onclick="generateReport()">Generate Report</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="salesChart" width="400" height="200"></canvas>
+                            <div id="reportSummary" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Team Performance Section -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #0d6efd;">
+                        <div class="card-header">
+                            <h5 class="mb-0">Sales Team Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="salesTeamRow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Yearly Sales Section -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm" style="border: none; border-top: 4px solid #198754;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Overall Yearly Sales</h5>
+                            <button class="btn btn-outline-primary btn-sm" onclick="generateAnnualReport()">Generate Annual Report</button>
+                        </div>
+                        <div class="card-body">
+                            <div id="monthlySummary" class="mb-3"></div>
+                            <canvas id="yearlySalesChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Deal Modal -->
+            <div class="modal fade" id="addDealModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Deal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addDealForm">
+                                <div class="mb-3">
+                                    <label for="dealName" class="form-label">Deal Name</label>
+                                    <input type="text" class="form-control" id="dealName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="salespersonSelect" class="form-label">Salesperson</label>
+                                    <select class="form-select" id="salespersonSelect" required>
+                                        <option value="">Select Salesperson</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="customerSelect" class="form-label">Customer</label>
+                                    <select class="form-select" id="customerSelect" required>
+                                        <option value="">Select Customer</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dealAmount" class="form-label">Amount (KES)</label>
+                                    <input type="number" class="form-control" id="dealAmount" step="0.01" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dealStage" class="form-label">Stage</label>
+                                    <select class="form-select" id="dealStage" required>
+                                        <option value="lead">Lead</option>
+                                        <option value="qualified">Qualified</option>
+                                        <option value="proposal">Proposal</option>
+                                        <option value="negotiation">Negotiation</option>
+                                        <option value="closed_won">Closed Won</option>
+                                        <option value="closed_lost">Closed Lost</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expectedClose" class="form-label">Expected Close Date</label>
+                                    <input type="date" class="form-control" id="expectedClose">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" onclick="saveSalesperson()">Save Salesperson</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <p class="lead">Welcome to the AI-Powered Sales Dashboard. Manage your sales pipeline, customers, and leads with intelligent insights.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPDATED: Sales Budget Form — Sends to Finance -->
+    <div class="section">
+      <h2><i class="fas fa-money-bill-wave me-2"></i> Sales Department Budget</h2>
+      <div class="card">
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('set_department_budget', department='Sales') }}">
+            <input type="hidden" name="department" value="Sales">
+            <div class="mb-3">
+              <label for="amount" class="form-label">Total Amount Required</label>
+              <input type="number" class="form-control" id="amount" name="amount" required>
+            </div>
+            <div class="mb-3">
+              <label for="due_date" class="form-label">Due Date</label>
+              <input type="date" class="form-control" id="due_date" name="due_date" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Set Sales Budget</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // [All your existing JavaScript unchanged — omitted for brevity]
+    // ... (same as original)
+    </script>
+</body>
+</html>

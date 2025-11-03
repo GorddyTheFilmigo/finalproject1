@@ -1,0 +1,34 @@
+<!-- department_reports.html -->
+{% extends "base.html" %}
+{% block title %}{{ department }} Reports{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">{{ department }} Department Reports</h2>
+    {% if reports %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.title }}</td>
+                    <td>{{ report.date.strftime('%Y-%m-%d') if report.date else '' }}</td>
+                    <td>
+                        <a href="/hr/reports/{{ report._id }}/csv" class="btn btn-primary btn-sm" download>Download CSV</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-center">No reports found for {{ department }} department.</p>
+    {% endif %}
+</div>
+{% endblock %}

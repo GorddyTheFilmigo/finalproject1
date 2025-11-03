@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" rel="stylesheet">
+  <!-- ✅ Barcode Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --secondary-color: #6c757d;
+      --low-stock-color: #dc3545;
+      --card-border: 4px solid var(--primary-color);
+
+    /* Smaller, appealing chart */
+    #categoryChart {
+      max-width: 280px;
+      max-height: 280px;
+      margin: 0 auto;
+      display: block;
+    }
+    }
+    body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .card { border-top: var(--card-border); box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+    .table th { background-color: var(--primary-color); color: white; }
+    .low-stock { color: var(--low-stock-color); font-weight: bold; }
+    .dashboard-card { text-align: center; }
+    .dashboard-card h5 { margin-bottom: 0.5rem; }
+    .dashboard-card h2 { margin-bottom: 0; }
+    /* Modal Scanner */
+    #scannerModal .modal-body { display: flex; justify-content: center; }
+    #reader { width: 100%; max-width: 400px; }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Inventory Management</h2>
+
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card dashboard-card">
+          <div class="card-body">
+            <h5>Total Items</h5>
+            <h2 id="totalItems">0</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card dashboard-card">
+          <div class="card-body">
+            <h5>Low Stock</h5>
+            <h2 id="lowStock" class="text-danger">0</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card dashboard-card">
+          <div class="card-body">
+            <h5>Total Value</h5>
+            <h2 id="totalValue">KES 0.00</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card dashboard-card">
+          <div class="card-body">
+            <h5>Categories</h5>
+            <h2 id="categoriesCount">0</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Chart -->
+    <div class="card mb-4">
+      <div class="card-header">Inventory by Category</div>
+      <div class="card-body">
+        <canvas id="categoryChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Add/Edit Form -->
+    <div class="card mb-4">
+      <div class="card-header">Add/Edit Item</div>
+      <div class="card-body">
+        <form id="inventoryForm">
+          <input type="hidden" id="itemId">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="sku" class="form-label">SKU / UPC / GTIN</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="sku" required>
+                <button type="button" class="btn btn-outline-primary" id="scanBarcodeBtn">
+                  <i class="bi bi-upc-scan"></i> Scan Barcode
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="quantity" class="form-label">Quantity</label>
+              <input type="number" class="form-control" id="quantity" min="0" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="price" class="form-label">Price</label>
+              <input type="number" class="form-control" id="price" min="0" step="0.01" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="alert_level" class="form-label">Alert Level</label>
+              <input type="number" class="form-control" id="alert_level" min="0" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="category" class="form-label">Category</label>
+              <input type="text" class="form-control" id="category" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="supplier" class="form-label">Supplier</label>
+              <input type="text" class="form-control" id="supplier" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Item</button>
+          <button type="button" class="btn btn-secondary" id="cancelEdit" style="display:none;">Cancel</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        Inventory Items
+        <div>
+          <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search..." style="width: 200px; display: inline-block;">
+        </div>
+      </div>
+      <div class="card-body">
+        <table id="inventoryTable" class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>SKU</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Category</th>
+              <th>Supplier</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center" id="pagination"></ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📸 Barcode Scanner Modal -->
+  <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="scannerModalLabel">Scan Barcode (UPC/GTIN)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="reader"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
+
+  <script>
+    const apiUrl = '/api/inventory';
+    let table;
+    let currentPage = 1;
+    const pageLimit = 10;
+    let categoryChart;
+    let html5QrCode;
+
+    async function fetchStats() {
+      try {
+        const response = await fetch(`${apiUrl}/stats`);
+        const stats = await response.json();
+        document.getElementById('totalItems').textContent = stats.total_items;
+        document.getElementById('lowStock').textContent = stats.low_stock;
+        document.getElementById('totalValue').textContent = `Ksh ${stats.total_value.toFixed(2)}`;
+        document.getElementById('categoriesCount').textContent = Object.keys(stats.categories).length;
+
+        const ctx = document.getElementById('categoryChart');
+        if (categoryChart) categoryChart.destroy();
+        categoryChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: Object.keys(stats.categories),
+            datasets: [{
+              data: Object.values(stats.categories),
+              backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1']
+            }]
+          },
+          options: { responsive: true }
+        });
+      } catch (err) {
+        alert('Error fetching stats: ' + err.message);
+      }
+    }
+
+    async function fetchItems(page = 1, query = '', sort = 'name', order = 'asc') {
+      try {
+        const url = `${apiUrl}?page=${page}&limit=${pageLimit}&q=${query}&sort=${sort}&order=${order}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        const tbody = document.querySelector('#inventoryTable tbody');
+        tbody.innerHTML = data.items.map(item => `
+          <tr class="${item.quantity < item.alert_level ? 'low-stock' : ''}">
+            <td>${item.name}</td>
+            <td>${item.sku}</td>
+            <td>${item.quantity}</td>
+            <td>Ksh ${item.price.toFixed(2)}</td>
+            <td>${item.category}</td>
+            <td>${item.supplier}</td>
+            <td>${new Date(item.last_updated).toLocaleDateString()}</td>
+            <td>
+              <button class="btn btn-sm btn-warning" onclick="editItem('${item._id}')">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteItem('${item._id}')">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+
+        const totalPages = Math.ceil(data.total / pageLimit);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+          const li = document.createElement('li');
+          li.className = `page-item ${i === page ? 'active' : ''}`;
+          li.innerHTML = `<a class="page-link" href="#" onclick="fetchItems(${i}, '${query}', '${sort}', '${order}')">${i}</a>`;
+          pagination.appendChild(li);
+        }
+      } catch (err) {
+        alert('Error fetching items: ' + err.message);
+      }
+    }
+
+    async function saveItem(e) {
+      e.preventDefault();
+      const id = document.getElementById('itemId').value;
+      const data = {
+        name: document.getElementById('name').value,
+        sku: document.getElementById('sku').value,
+        quantity: parseInt(document.getElementById('quantity').value),
+        price: parseFloat(document.getElementById('price').value),
+        category: document.getElementById('category').value,
+        supplier: document.getElementById('supplier').value,
+        description: document.getElementById('description').value,
+        alert_level: parseInt(document.getElementById('alert_level').value)
+      };
+
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `${apiUrl}/${id}` : apiUrl;
+
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error((await response.json()).error);
+        resetForm();
+        fetchItems(currentPage);
+        fetchStats();
+      } catch (err) {
+        alert('Error saving item: ' + err.message);
+      }
+    }
+
+    async function editItem(id) {
+      try {
+        const response = await fetch(`${apiUrl}/${id}`);
+        const item = await response.json();
+        document.getElementById('itemId').value = item._id;
+        document.getElementById('name').value = item.name;
+        document.getElementById('sku').value = item.sku;
+        document.getElementById('quantity').value = item.quantity;
+        document.getElementById('price').value = item.price;
+        document.getElementById('category').value = item.category;
+        document.getElementById('supplier').value = item.supplier;
+        document.getElementById('description').value = item.description;
+        document.getElementById('alert_level').value = item.alert_level;
+        document.querySelector('.card-header').textContent = 'Edit Item';
+        document.getElementById('cancelEdit').style.display = 'inline-block';
+      } catch (err) {
+        alert('Error editing item: ' + err.message);
+      }
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('Are you sure?')) return;
+      try {
+        const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error((await response.json()).error);
+        fetchItems(currentPage);
+        fetchStats();
+      } catch (err) {
+        alert('Error deleting item: ' + err.message);
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('inventoryForm').reset();
+      document.getElementById('itemId').value = '';
+      document.querySelector('.card-header').textContent = 'Add New Item';
+      document.getElementById('cancelEdit').style.display = 'none';
+    }
+
+    document.getElementById('inventoryForm').addEventListener('submit', saveItem);
+    document.getElementById('cancelEdit').addEventListener('click', resetForm);
+
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => {
+      currentPage = 1;
+      fetchItems(currentPage, searchInput.value);
+    });
+
+    // 📸 Initialize Barcode Scanner
+    document.getElementById('scanBarcodeBtn').addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
+      modal.show();
+
+      if (html5QrCode) html5QrCode.stop();
+
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        decodedText => {
+          document.getElementById('sku').value = decodedText;
+          modal.hide();
+          html5QrCode.stop();
+        },
+        errorMessage => { console.log(errorMessage); }
+      ).catch(err => alert("Camera access error: " + err));
+    });
+
+    document.getElementById('scannerModal').addEventListener('hidden.bs.modal', () => {
+      if (html5QrCode) html5QrCode.stop();
+    });
+
+    // Initial load
+    fetchItems();
+    fetchStats();
+  </script>
+</body>
+</html>

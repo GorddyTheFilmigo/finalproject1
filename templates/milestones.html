@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales Milestone Tracker | FirmManager Pro</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --gradient: linear-gradient(135deg, #1e40af, #3b82f6);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom right, #f0f9ff, #e0f2fe);
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100vh;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      padding: 1.5rem 0;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .logo span { color: #facc15; }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: #475569;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: #f1f5f9;
+      color: var(--primary);
+      border-left-color: var(--primary);
+    }
+
+    .menu-item i {
+      width: 20px;
+      margin-right: 12px;
+      font-size: 1.1rem;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      padding: 2rem;
+    }
+
+    .page-title {
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease;
+      border: none;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stats-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      margin-bottom: 1rem;
+    }
+
+    .milestone-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+      border-left: 5px solid var(--primary);
+    }
+
+    .progress {
+      height: 12px;
+      border-radius: 6px;
+      background: #e2e8f0;
+    }
+
+    .progress-bar {
+      border-radius: 6px;
+      transition: width 0.6s ease;
+    }
+
+    .team-member {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      margin-right: 12px;
+      font-size: 0.9rem;
+    }
+
+    .badge-status {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 50px;
+    }
+
+    .ai-insight {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .export-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 992px) {
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .main-content { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="p-4 border-bottom text-center">
+      <div class="logo">Firm<span>Pro</span></div>
+      <p class="text-muted small mt-1">Sales Milestone Tracker</p>
+    </div>
+    <nav class="mt-3">
+      <a href="/" class="menu-item active">
+        <i class="fas fa-trophy"></i> Milestones
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-chart-line"></i> Performance
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-users"></i> Team
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container-fluid">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">
+          <i class="fas fa-trophy text-warning me-2"></i>
+          Sales Milestone Tracker
+        </h1>
+        <button class="export-btn" onclick="exportReport()">
+          <i class="fas fa-download me-1"></i> Export CSV
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Loading milestones from database...</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="row g-4 mb-5" id="statsRow" style="display: none;">
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <div class="stats-icon" style="background: var(--primary);">
+              <i class="fas fa-bullseye"></i>
+            </div>
+            <h3 class="mb-0" id="totalMilestones">0</h3>
+            <p class="text-muted small">Total Milestones</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <div class="stats-icon" style="background: var(--success);">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="mb-0" id="completedMilestones">0</h3>
+            <p class="text-muted small">Completed</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <div class="stats-icon" style="background: var(--warning);">
+              <i class="fas fa-clock"></i>
+            </div>
+            <h3 class="mb-0" id="inProgressMilestones">0</h3>
+            <p class="text-muted small">In Progress</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <div class="stats-icon" style="background: var(--danger);">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="mb-0" id="atRiskMilestones">0</h3>
+            <p class="text-muted small">At Risk</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Insight -->
+      <div class="ai-insight" id="aiInsight" style="display: none;">
+        <h5><i class="fas fa-brain me-2"></i> AI Insight</h5>
+        <p class="mb-0" id="aiMessage"></p>
+      </div>
+
+      <!-- Milestones -->
+      <h4 class="mb-3">Active Milestones</h4>
+      <div id="milestonesContainer"></div>
+
+      <!-- Team & Chart -->
+      <div class="row mt-5">
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-users text-primary me-2"></i>
+                Milestone Owners
+              </h5>
+              <div id="teamContainer"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-chart-pie text-success me-2"></i>
+                Progress Overview
+              </h5>
+              <canvas id="progressChart" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    let milestones = [];
+    let chart = null;
+
+    async function loadMilestones() {
+      try {
+        const res = await fetch('/api/milestones');
+        milestones = await res.json();
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('statsRow').style.display = 'flex';
+        document.getElementById('aiInsight').style.display = 'block';
+
+        renderStats();
+        renderMilestones();
+        renderTeam();
+        renderChart();
+        generateAIInsight();
+      } catch (err) {
+        document.getElementById('loading').innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> Failed to load data. Is the server running?
+          </div>`;
+      }
+    }
+
+    function renderStats() {
+      const total = milestones.length;
+      const completed = milestones.filter(m => m.status === 'completed').length;
+      const inProgress = milestones.filter(m => m.status === 'in_progress').length;
+      const atRisk = milestones.filter(m => m.status === 'at_risk').length;
+
+      document.getElementById('totalMilestones').textContent = total;
+      document.getElementById('completedMilestones').textContent = completed;
+      document.getElementById('inProgressMilestones').textContent = inProgress;
+      document.getElementById('atRiskMilestones').textContent = atRisk;
+    }
+
+    function renderMilestones() {
+      const container = document.getElementById('milestonesContainer');
+      container.innerHTML = milestones.map(m => {
+        const progress = Math.min(Math.round((m.achieved_value / m.target_value) * 100), 100);
+        const isCompleted = m.status === 'completed';
+        const isAtRisk = m.status === 'at_risk';
+        const color = isCompleted ? 'bg-success' : isAtRisk ? 'bg-danger' : 'bg-primary';
+        const badge = isCompleted ? 'bg-success' : isAtRisk ? 'bg-danger' : 'bg-warning';
+
+        return `
+          <div class="milestone-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 class="mb-1">${m.name}</h5>
+                <p class="text-muted small mb-0">
+                  Owner: <strong>${m.owner}</strong> | Due: <strong>${formatDate(m.due_date)}</strong>
+                </p>
+              </div>
+              <span class="badge ${badge} badge-status">${m.status.replace('_', ' ').toUpperCase()}</span>
+            </div>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small text-muted">
+                <span>Achieved: <strong>${formatNumber(m.achieved_value)}</strong></span>
+                <span>Target: <strong>${formatNumber(m.target_value)}</strong></span>
+              </div>
+            </div>
+            <div class="progress">
+              <div class="progress-bar ${color}" style="width: ${progress}%">${progress}%</div>
+            </div>
+            ${isAtRisk ? '<p class="text-danger small mt-2"><i class="fas fa-exclamation-triangle"></i> At risk of missing deadline</p>' : ''}
+          </div>
+        `;
+      }).join('') || '<p class="text-muted">No milestones found.</p>';
+    }
+
+    function renderTeam() {
+      const owners = [...new Set(milestones.map(m => m.owner))];
+      const container = document.getElementById('teamContainer');
+      container.innerHTML = owners.map(owner => {
+        const ownerMilestones = milestones.filter(m => m.owner === owner);
+        const achieved = ownerMilestones.reduce((sum, m) => sum + m.achieved_value, 0);
+        const target = ownerMilestones.reduce((sum, m) => sum + m.target_value, 0);
+        const progress = target > 0 ? Math.round((achieved / target) * 100) : 0;
+        const avatar = owner.split(' ').map(n => n[0]).join('').toUpperCase();
+
+        return `
+          <div class="team-member">
+            <div class="avatar">${avatar}</div>
+            <div class="flex-grow-1">
+              <h6 class="mb-0">${owner}</h6>
+              <p class="text-muted small mb-0">${ownerMilestones.length} milestone(s)</p>
+            </div>
+            <div class="text-end">
+              <small class="d-block text-muted">Progress</small>
+              <strong>${progress}%</strong>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderChart() {
+      const completed = milestones.filter(m => m.status === 'completed').length;
+      const inProgress = milestones.filter(m => m.status === 'in_progress').length;
+      const atRisk = milestones.filter(m => m.status === 'at_risk').length;
+
+      const ctx = document.getElementById('progressChart');
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'In Progress', 'At Risk'],
+          datasets: [{
+            data: [completed, inProgress, atRisk],
+            backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    function generateAIInsight() {
+      const total = milestones.length;
+      const completed = milestones.filter(m => m.status === 'completed').length;
+      const overallProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
+      const atRisk = milestones.filter(m => m.status === 'at_risk').length;
+
+      let message = '';
+      if (overallProgress >= 90) {
+        message = `Outstanding! You're <strong>${overallProgress}%</strong> on track. Keep pushing to close the year strong!`;
+      } else if (overallProgress >= 70) {
+        message = `Solid progress at <strong>${overallProgress}%</strong>. Focus on high-impact milestones to hit 100%.`;
+      } else if (atRisk > 0) {
+        message = `<strong>Warning:</strong> ${atRisk} milestone(s) at risk. Prioritize immediate action to avoid slippage.`;
+      } else {
+        message = `You're at <strong>${overallProgress}%</strong> completion. Steady progress — maintain momentum!`;
+      }
+
+      document.getElementById('aiMessage').innerHTML = message;
+    }
+
+    function exportReport() {
+      const headers = ['Name', 'Target', 'Achieved', 'Progress %', 'Status', 'Owner', 'Due Date'];
+      const rows = milestones.map(m => {
+        const progress = Math.round((m.achieved_value / m.target_value) * 100);
+        return [
+          m.name,
+          m.target_value,
+          m.achieved_value,
+          progress + '%',
+          m.status.replace('_', ' '),
+          m.owner,
+          m.due_date
+        ];
+      });
+
+      const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `milestones-report-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function formatNumber(num) {
+      return Number(num).toLocaleString();
+    }
+
+    function formatDate(date) {
+      return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // Load on start
+    document.addEventListener('DOMContentLoaded', loadMilestones);
+  </script>
+</body>
+</html>

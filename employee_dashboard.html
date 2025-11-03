@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Employee Dashboard - {{ employee.name }}</h3>
+
+<!-- Time Tracking -->
+<div class="alert alert-info">
+  <h5>Time Tracking</h5>
+  <p>
+    Logged in at: <b>{{ employee.login_time | formatdate('%I:%M %p') }}</b><br>
+    Logged out at: <b>{{ employee.logout_time | formatdate('%I:%M %p') if employee.logout_time else "Active Session" }}</b><br>
+    Total hours today: <b>{{ employee.today_hours }}</b>
+  </p>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <!-- Timesheets -->
+    <h5>Timesheets</h5>
+    <form method="post" action="/employee/timesheet/add" class="mb-2">
+      {{ form.hidden_tag() }}
+      <div class="mb-2"><input class="form-control" name="date" type="date" required></div>
+      <div class="mb-2"><input class="form-control" name="hours" placeholder="Hours" required></div>
+      <div class="mb-2"><input class="form-control" name="note" placeholder="Note"></div>
+      <button class="btn btn-primary">Add Timesheet</button>
+    </form>
+    <input class="form-control mb-2" id="timesheet-search" oninput="tableSearch('timesheet-search','timesheet-table')" placeholder="Search timesheets...">
+    <table class="table table-striped" id="timesheet-table"><thead><tr><th>#</th><th>Date</th><th>Hours</th><th>Note</th></tr></thead><tbody>
+      {% for t in employee.timesheets %}
+        <tr><td>{{ loop.index }}</td><td>{{ t.date | formatdate }}</td><td>{{ t.hours }}</td><td>{{ t.note }}</td></tr>
+      {% endfor %}
+    </tbody></table><script>paginateTable('timesheet-table',5);</script>
+  </div>
+
+  <div class="col-md-6">
+    <!-- Leave Requests -->
+    <h5>Leave Requests (HR)</h5>
+    <form method="post" action="/employee/leaves" class="mb-2">
+      {{ form.hidden_tag() }}
+      <div class="mb-2"><input class="form-control" name="from_date" type="date" required></div>
+      <div class="mb-2"><input class="form-control" name="to_date" type="date" required></div>
+      <div class="mb-2"><input class="form-control" name="reason" placeholder="Reason" required></div>
+      <button class="btn btn-warning">Submit Leave Request</button>
+    </form>
+    <input class="form-control mb-2" id="leave-search" oninput="tableSearch('leave-search','leave-table')" placeholder="Search leaves...">
+    <table class="table table-striped" id="leave-table"><thead><tr><th>#</th><th>From</th><th>To</th><th>Reason</th><th>Status</th></tr></thead><tbody>
+      {% for l in employee.leaves %}
+        <tr><td>{{ loop.index }}</td><td>{{ l.from_date | formatdate }}</td><td>{{ l.to_date | formatdate }}</td><td>{{ l.reason }}</td><td>{{ l.status }}</td></tr>
+      {% endfor %}
+    </tbody></table><script>paginateTable('leave-table',5);</script>
+
+    <!-- Claims (Finance) -->
+    <h5 class="mt-4">Claims (Finance)</h5>
+    <form method="post" action="/employee/claims" class="mb-2">
+      {{ form.hidden_tag() }}
+      <div class="mb-2"><input class="form-control" name="date" type="date" required></div>
+      <div class="mb-2"><input class="form-control" name="amount" placeholder="Amount" required></div>
+      <div class="mb-2"><input class="form-control" name="description" placeholder="Description" required></div>
+      <button class="btn btn-danger">Submit Claim</button>
+    </form>
+    <input class="form-control mb-2" id="claim-search" oninput="tableSearch('claim-search','claim-table')" placeholder="Search claims...">
+    <table class="table table-striped" id="claim-table"><thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Description</th><th>Status</th></tr></thead><tbody>
+      {% for c in employee.claims %}
+        <tr><td>{{ loop.index }}</td><td>{{ c.date | formatdate }}</td><td>{{ c.amount }}</td><td>{{ c.description }}</td><td>{{ c.status }}</td></tr>
+      {% endfor %}
+    </tbody></table><script>paginateTable('claim-table',5);</script>
+  </div>
+</div>
+
+<hr>
+
+<!-- Feedback & Notifications -->
+<div class="row mt-4">
+  <div class="col-md-6">
+    <h5>Notifications</h5>
+    <ul class="list-group">
+      {% for n in employee.notifications %}
+        <li class="list-group-item">{{ n.type }}: {{ n.message }} ({{ n.date | formatdate }})</li>
+      {% else %}
+        <li class="list-group-item text-muted">No notifications yet</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="col-md-6">
+    <h5>Performance Feedback (HR)</h5>
+    <form method="post" action="/employee/performance" class="mb-2">
+      {{ form.hidden_tag() }}
+      <div class="mb-2"><textarea class="form-control" name="feedback" placeholder="Enter your performance feedback" required></textarea></div>
+      <button class="btn btn-info">Submit Feedback</button>
+    </form>
+    <ul class="list-group">
+      {% for pf in employee.performance_feedback %}
+        <li class="list-group-item">{{ pf.feedback }} ({{ pf.date | formatdate }}) - Status: {{ pf.status }}</li>
+      {% else %}
+        <li class="list-group-item text-muted">No performance feedback yet</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- Tasks Section -->
+<div class="mt-4">
+  <h5>My Tasks</h5>
+  <table class="table table-striped" id="task-table">
+    <thead><tr><th>#</th><th>Title</th><th>Description</th><th>Department</th><th>Progress</th><th>Due Date</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for task in employee.tasks %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ task.title }}</td>
+          <td>{{ task.description }}</td>
+          <td>{{ task.department }}</td>
+          <td>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" style="width: {{ task.progress }}%;" aria-valuenow="{{ task.progress }}" aria-valuemin="0" aria-valuemax="100">{{ task.progress }}%</div>
+            </div>
+          </td>
+          <td>{{ task.due_date | formatdate }}</td>
+          <td>{{ task.status }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="text-muted">No tasks assigned yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <script>paginateTable('task-table',5);</script>
+</div>
+{% endblock %}

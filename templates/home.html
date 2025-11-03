@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FirmManager Pro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+   <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --accent: #facc15;
+      --dark-bg: #0f172a;
+      --light-bg: #f9fafb;
+      --text-light: #f1f5f9;
+      --text-muted: #94a3b8;
+      --gradient: linear-gradient(90deg, #1e3a8a, #2563eb, #3b82f6);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--gradient);
+      transition: all 0.3s ease;
+    }
+    .navbar-scrolled {
+      background: rgba(30, 41, 59, 0.95) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background-color: var(--primary);
+      border: none;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-2px);
+    }
+    .btn-outline-light:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(180deg, rgba(30,58,138,0.8), rgba(15,23,42,0.9)), url('https://images.unsplash.com/photo-1498050108023-c5249f4df085') center/cover no-repeat;
+      color: var(--text-light);
+      border-radius: 12px;
+      padding: 6rem 2rem;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+    }
+
+    /* Cards */
+    .card {
+      background-color: #1e293b;
+      border: none;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    }
+    .card-title {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Stats */
+    .stats {
+      background: #0f172a;
+      color: var(--text-light);
+    }
+
+    /* CTA */
+    .cta-section {
+      background: var(--gradient);
+      color: white;
+      text-align: center;
+      padding: 4rem 2rem;
+      border-radius: 0 0 16px 16px;
+    }
+    .cta-section .btn-light:hover {
+      background-color: var(--accent);
+      color: #000;
+      transform: translateY(-3px);
+    }
+
+    /* Footer */
+    footer {
+      background: #111827;
+      color: var(--text-muted);
+    }
+    footer a {
+      text-decoration: none;
+      color: var(--text-muted);
+    }
+    footer a:hover {
+      color: var(--accent);
+    }
+
+    /* Fade animation */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Modal */
+    .modal-content {
+      background-color: #f8fafc;
+      border-radius: 12px;
+    }
+    .modal-header {
+      background-color: var(--primary);
+      color: white;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+  </style>
+</head>
+<body style="background-color: black;color: white;">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="#">FirmManager<b style="color:gold;font-family: verdana;">Pro</b></a>
+      <div class="d-flex">
+        <!-- Keep login/register visible (unchanged) -->
+        <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
+      </div>
+    </div>
+  </nav>
+  <div style="text-align: left; margin-top: 20px; block-size: 10px;">
+  <img 
+    src="{{ url_for('static', filename='images/logo.png') }}" 
+    alt="Logo"
+    style="
+      width: 280px; 
+      height: auto; 
+      border: 5px solid #00bfa6; /* teal accent */
+      border-radius: 10px; 
+      padding: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    ">
+</div>
+
+
+
+  <!-- Hero Section -->
+  <div class="container text-center mt-5">
+    <h1 class="display-4">Welcome to FirmManager<b style="color:gold;font-family: verdana;">Pro</b></h1>
+    <p class="lead">Your all-in-one solution for managing clients, projects, billing, and teams.</p>
+  </div>
+
+  <!-- Login Modal (unchanged) -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('login') }}">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalLabel">Login</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="loginEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="loginEmail" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="loginPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="loginPassword" name="password" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Modal (unchanged) -->
+  <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('register') }}">
+          <div class="modal-header">
+            <h5 class="modal-title" id="registerModalLabel">Register</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="registerName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="registerName" name="name" required>
+            </div>
+            <div class="mb-3">
+              <label for="registerEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="registerEmail" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="registerPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="registerPassword" name="password" required>
+            </div>
+            <div class="mb-3">
+              <label for="registerRole" class="form-label">Role</label>
+              <select class="form-select" id="registerRole" name="role" required>
+                <option value="client">Client</option>
+                <option value="employee">Employee</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EMPLOYEE FIRST-LOGIN SECTION ========== -->
+  <div class="modal fade" id="employeeFirstLoginModal" tabindex="-1" aria-labelledby="employeeFirstLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="employeeFirstLoginForm" method="POST" action="{{ url_for('employee_first_login') }}">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="employeeFirstLoginModalLabel">First-Time Employee Login</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="small text-muted mb-3">
+              Use the <strong>username</strong> and <strong>temporary password</strong> provided by HR.
+              After login you will be asked to set a new password.
+            </p>
+
+            <div class="mb-3">
+              <label for="empUsername" class="form-label">Username</label>
+              <input type="text" class="form-control" id="empUsername" name="username" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="empTempPassword" class="form-label">Temporary Password</label>
+              <input type="password" class="form-control" id="empTempPassword" name="temp_password" required>
+            </div>
+
+            <!-- Hidden field to identify first-login flow -->
+            <input type="hidden" name="first_login" value="1">
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Reset Modal (shown automatically after first-login validation) -->
+  <div class="modal fade" id="employeeResetPasswordModal" tabindex="-1" aria-labelledby="employeeResetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="employeeResetPasswordForm" method="POST" action="{{ url_for('employee_reset_password') }}">
+          <div class="modal-header bg-warning text-dark">
+            <h5 class="modal-title" id="employeeResetPasswordModalLabel">Set Your New Password</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPassword" name="new_password" required>
+            </div>
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+            </div>
+            <!-- Carry over username for backend validation -->
+            <input type="hidden" id="resetUsername" name="username">
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save & Continue</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add a button in the navbar for employees (next to Login) -->
+  <script>
+  // Insert the button dynamically after page load (keeps original code untouched)
+  document.addEventListener('DOMContentLoaded', () => {
+    const loginBtn = document.querySelector('.navbar .btn-outline-light');
+    if (loginBtn) {
+      const empBtn = document.createElement('button');
+      empBtn.className = 'btn btn-info ms-2';
+      empBtn.textContent = 'Employee First Login';
+      empBtn.setAttribute('data-bs-toggle', 'modal');
+      empBtn.setAttribute('data-bs-target', '#employeeFirstLoginModal');
+      loginBtn.parentNode.insertBefore(empBtn, loginBtn.nextSibling);
+    }
+  });
+  </script>
+
+<!-- ========== HERO & CONTENT ========== -->
+<div class="container my-5 p-4 rounded-3 shadow-sm" style="border:1px solid #c7d2fe;background:grey;">
+  <!-- Hero -->
+  <section class="hero py-5" style="padding-top:120px;">
+    <div class="container text-center">
+      <h1 class="display-4 fw-bold mb-3">Transform Your Firm's Operations</h1>
+      <p class="lead mb-4">Streamline workflows, boost productivity, and drive growth with our comprehensive firm management system designed for modern businesses.</p>
+    </div>
+  </section>
+
+  <!-- Features (restored with all six cards) -->
+  <section id="features" class="py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Powerful Features for Modern Firms</h2>
+        <p class="text-muted">Everything you need to manage your firm efficiently in one integrated platform</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm fade-in">
+            <div class="card-body text-center">
+              <div class="feature-icon">Chart</div>
+              <h5 class="card-title">Advanced Analytics</h5>
+              <p class="card-text small">Get deep insights into your firm's performance with real-time analytics and customizable dashboards that help you make data-driven decisions.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm fade-in">
+            <div class="card-body text-center">
+              <div class="feature-icon">People</div>
+              <h5 class="card-title">Client Management</h5>
+              <p class="card-text small">Maintain comprehensive client profiles, track interactions, and manage relationships with our intuitive CRM system.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm fade-in">
+            <div class="card-body text-center">
+              <div class="feature-icon">Lightning</div>
+              <h5 class="card-title">Workflow Automation</h5>
+              <p class="card-text small">Automate repetitive tasks, streamline processes, and reduce manual work with intelligent workflow automation tools.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm fade-in">
+            <div class="card-body text-center">
+              <div class="feature-icon">Folder</div>
+              <h5 class="card-title">Document Management</h5>
+              <p class="card-text small">Organize, store, and share documents securely with version control, electronic signatures, and collaboration features.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm fade-in">
+            <div class="card-body text-center">
+              <div class="feature-icon">Briefcase</div>
+              <h5 class="card-title">Project Tracking</h5>
+              <p class="card-text small">Monitor project progress, allocate resources effectively, and ensure deadlines are met with comprehensive project management tools.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm fade-in">
+            <div class="card-body text-center">
+              <div class="feature-icon">Lock</div>
+              <h5 class="card-title">Security & Compliance</h5>
+              <p class="card-text small">Enterprise-grade security with encryption, access controls, and compliance features to protect your firm's sensitive data.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Advertisement Section -->
+  <section id="advertisements" class="py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Job Advertisements</h2>
+        <p class="text-muted">Explore our current open positions and join our team. Create an account and login to apply.</p>
+      </div>
+
+      {% if open_positions %}
+      <div class="row g-4">
+        {% for position in open_positions %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm fade-in">
+            <div class="card-body">
+              <h5 class="card-title">{{ position.title }}</h5>
+              <p class="card-text small">Requirements: {{ position.requirements }}</p>
+              <p class="card-text small">Application Deadline: {{ position.deadline }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+              <!-- Changed to open the apply modal directly (applicants don't need to register) -->
+              <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#applyModal" data-position="{{ position.title }}">Apply Now</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center">
+        <p class="lead">No open positions at the moment. Check back soon!</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+    <!-- Application Modal (with phone number + gender + HR redirect) -->
+<div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content text-dark">
+      <form method="POST" action="{{ url_for('apply_job') }}" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="applyModalLabel">Job Application</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Position applied (hidden, auto-filled when user clicks Apply button) -->
+          <input type="hidden" id="appliedPosition" name="position">
+
+          <!-- Full Name -->
+          <div class="mb-3">
+            <label for="fullName" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="fullName" name="name" required>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+
+          <!-- Gender -->
+          <div class="mb-3">
+            <label class="form-label">Gender</label>
+            <div>
+              <input type="radio" id="male" name="gender" value="Male" required>
+              <label for="male">Male</label>
+            </div>
+            <div>
+              <input type="radio" id="female" name="gender" value="Female" required>
+              <label for="female">Female</label>
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="phone" name="phone" placeholder="+2547XXXXXXXX" required>
+          </div>
+
+          <!-- Qualifications -->
+          <div class="mb-3">
+            <label for="qualification" class="form-label">Qualifications</label>
+            <textarea class="form-control" id="qualification" name="qualifications" rows="3" required></textarea>
+          </div>
+
+          <!-- Resume Upload -->
+          <div class="mb-3">
+            <label for="resume" class="form-label">Upload Resume (PDF/DOC)</label>
+            <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- Stats + CTA (unchanged) -->
+  <section class="stats py-5 bg-light rounded-3">
+    <div class="container">
+      <div class="row text-center gy-4">
+        <div class="col-6 col-md-3"><div class="stat-item fade-in"><h3>10,000+</h3><p class="mb-0">Active Firms</p></div></div>
+        <div class="col-6 col-md-3"><div class="stat-item fade-in"><h3>99.9%</h3><p class="mb-0">Uptime Guarantee</p></div></div>
+        <div class="col-6 col-md-3"><div class="stat-item fade-in"><h3>50%</h3><p class="mb-0">Productivity Increase</p></div></div>
+        <div class="col-6 col-md-3"><div class="stat-item fade-in"><h3>24/7</h3><p class="mb-0">Expert Support</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+
+    <!-- CTA -->
+</div>
+
+<!-- Footer unchanged -->
+<footer class="py-5 bg-dark text-white">
+  <div class="container">
+    <div class="row gy-4">
+      <div class="col-lg-3"><h5>FirmManager Pro</h5><p class="small">Empowering firms with intelligent management solutions for the digital age.</p></div>
+      <div class="col-6 col-lg-2"><h6>Product</h6><ul class="list-unstyled small"><li><a href="#" class="text-white-50">Features</a></li><li><a href="#" class="text-white-50">Pricing</a></li><li><a href="#" class="text-white-50">Security</a></li><li><a href="#" class="text-white-50">Integrations</a></li></ul></div>
+      <div class="col-6 col-lg-2"><h6>Company</h6><ul class="list-unstyled small"><li><a href="#" class="text-white-50">About Us</a></li><li><a href="#" class="text-white-50">Careers</a></li><li><a href="#" class="text-white-50">Press</a></li><li><a href="#" class="text-white-50">Contact</a></li></ul></div>
+      <div class="col-6 col-lg-2"><h6>Support</h6><ul class="list-unstyled small"><li><a href="#" class="text-white-50">Help Center</a></li><li><a href="#" class="text-white-50">Documentation</a></li><li><a href="#" class="text-white-50">API Reference</a></li><li><a href="#" class="text-white-50">Community</a></li></ul></div>
+    </div>
+    <hr class="my-4 bg-white-50">
+    <div class="text-center small text-white-50">&copy; 2025 FirmManager Pro. All rights reserved. | <a href="#" class="text-white-50">Privacy Policy</a> | <a href="#" class="text-white-50">Terms of Service.  | </a><a href="#"> Made by:Gordon Onyango</a></div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// navbar scroll behaviour
+window.addEventListener('scroll', () => {
+  document.querySelector('.navbar').classList.toggle('navbar-scrolled', window.scrollY > 50);
+});
+
+// fade-in observer
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => e.isIntersecting && e.target.classList.add('visible'));
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+// pass job title to modal
+const applyModal = document.getElementById('applyModal');
+applyModal.addEventListener('show.bs.modal', event => {
+  const button = event.relatedTarget;
+  const position = button.getAttribute('data-position');
+  document.getElementById('appliedPosition').value = position;
+});
+</script>
+
+</body>
+</html>

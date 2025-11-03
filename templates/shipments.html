@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shipments - {{ config.SITE_NAME or 'MyShop' }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+  <h1 class="mb-4 text-center">📦 Shipments</h1>
+
+  <div class="d-flex justify-content-between mb-3">
+    <button class="btn btn-primary">➕ Add Shipment</button>
+    <input type="text" class="form-control w-25" placeholder="🔍 Search shipment...">
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-hover shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>Shipment ID</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Status</th>
+          <th>Shipped Date</th>
+          <th>Expected Delivery</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if shipments and shipments|length > 0 %}
+          {% for s in shipments %}
+          <tr>
+            <td>{{ s.shipment_id or "-" }}</td>
+            <td>{{ s.customer_name or "Unknown" }}</td>
+            <td>{{ s.address or "N/A" }}</td>
+            <td>
+              {% if s.status == "Delivered" %}
+                <span class="badge bg-success">Delivered</span>
+              {% elif s.status == "In Transit" %}
+                <span class="badge bg-warning text-dark">In Transit</span>
+              {% else %}
+                <span class="badge bg-secondary">Pending</span>
+              {% endif %}
+            </td>
+            <td>{{ s.shipped_date or "-" }}</td>
+            <td>{{ s.expected_delivery or "-" }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary">Edit</button>
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              🚚 No shipments recorded yet. Add one to get started!
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

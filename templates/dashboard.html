@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <input type="text" class="form-control w-50" placeholder="Search clients, projects, documents...">
+    <div>
+        <i class="bi bi-bell"></i>
+        <i class="bi bi-person ms-3"></i>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-3"><div class="card p-3"><h6>Active Clients</h6><h3>142</h3><small class="text-success">+12% from last month</small></div></div>
+    <div class="col-md-3"><div class="card p-3"><h6>Active Projects</h6><h3>38</h3><small class="text-success">+8% from last month</small></div></div>
+    <div class="col-md-3"><div class="card p-3"><h6>Billable Hours (This Month)</h6><h3>1,247</h3><small class="text-success">+15% from last month</small></div></div>
+    <div class="col-md-3"><div class="card p-3"><h6>Monthly Revenue</h6><h3>$184,200</h3><small class="text-success">+22% from last month</small></div></div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6>Quick Actions</h6>
+            <button class="btn btn-outline-primary w-100 mb-2">Add New Client</button>
+            <button class="btn btn-outline-primary w-100 mb-2">Create New Project</button>
+            <button class="btn btn-outline-primary w-100 mb-2">Start Time Tracking</button>
+            <button class="btn btn-outline-primary w-100">Generate Invoice</button>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6>Today's Schedule</h6>
+            <ul class="list-unstyled">
+                <li><span class="text-primary">●</span> Client Meeting - ABC Corp <br><small>10:00 AM – 11:30 AM</small></li>
+                <li class="mt-2"><span class="text-purple">●</span> Project Review - Legal Case #123 <br><small>2:00 PM – 3:00 PM</small></li>
+                <li class="mt-2"><span class="text-warning">●</span> Team Standup <br><small>4:30 PM – 5:00 PM</small></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card p-3 mt-3">
+    <h6>Recent Activity</h6>
+    <ul class="list-unstyled">
+        <li>🟢 New client <b>TechStart Inc.</b> added by John Doe <small class="text-muted">2 hours ago</small></li>
+        <li>🟢 Project <b>Website Redesign</b> completed <small class="text-muted">4 hours ago</small></li>
+        <li>🟢 Invoice #INV-2024-0156 paid - $15,000 <small class="text-muted">6 hours ago</small></li>
+        <li>🟢 45.5 hours logged by the team today <small class="text-muted">8 hours ago</small></li>
+    </ul>
+</div>
+{% endblock %}

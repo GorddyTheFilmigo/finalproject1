@@ -10,3 +10,5 @@ flask_mail
 flask_cors
 Flask
 gunicorn
+openai
+requests

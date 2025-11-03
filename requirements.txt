@@ -13,3 +13,4 @@ gunicorn
 openai
 requests
 flask_pymongo
+dateutil
